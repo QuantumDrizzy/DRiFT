@@ -69,8 +69,8 @@ DRIFT/
 
 ## Status
 
-**Phases P0–P8 landed.** The engine, the four ground-state faces, the synthesis,
-and now the *dynamical* face:
+**Phases P0–P9 landed.** The engine, the four ground-state faces, the synthesis,
+the *dynamical* face, and now the optimization face run *quantum*:
 
 - P0 — scaffolding · P1 — engine + observability · P2 — optimization (MaxCut) ·
   P3 — quantum ground state + χ thermometer · P4 — Hopfield memory · P5 — Wang-tile
@@ -82,10 +82,17 @@ and now the *dynamical* face:
   `figures/phase8_reservoir.png`). It can be built from a real `drift.ising.IsingModel`,
   and its spectral radius is set via the **Spectra** spine, so DRIFT is a Spectra
   consumer. Ships with DRIFT's first automated test suite (`tests/test_reservoir.py`, 5/5).
+- **P9 — the optimization face, run quantum** (`drift/anneal.py`): the *same* Ising
+  ground state Phase 2 reached by thermal annealing, now reached by **adiabatic quantum
+  annealing** — evolve the uniform superposition |+…+⟩ under `H(s) = (1−s)(−ΣXᵢ) + s·H_problem`.
+  Slow anneal → ground state (success ≈ 1.00); sudden quench fails (success < 0.01). The
+  honest limit, measured: shrinking the gap (`Δ_min` 0.96 → 0.27) drops success (0.99 → 0.60
+  at fixed T) — **quantum annealing pays the spectral gap; when it closes, QA fails too. No
+  magic** (`tests/test_anneal.py`, 5/5; `figures/phase9_quantum_anneal.png`).
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..7}-results.md`.
+[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..9}-results.md`.
 
 ## Results (the figures)
 
@@ -104,7 +111,13 @@ compute capacity (memory capacity MC = 43.5 at N=200) peaking at the **edge of c
 
 ![Reservoir capacity at the edge of chaos](figures/phase8_reservoir.png)
 
-Per-phase write-ups (P1–P8) live in [`docs/results/`](docs/results/).
+**The optimization face, run quantum** — adiabatic quantum annealing reaches the same Ising
+ground state; a slower anneal succeeds, but the **spectral gap** sets the price (and when it
+closes, quantum annealing fails too):
+
+![Quantum annealing and the spectral gap](figures/phase9_quantum_anneal.png)
+
+Per-phase write-ups (P1–P9) live in [`docs/results/`](docs/results/).
 
 ## Stack
 

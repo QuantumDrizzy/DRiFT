@@ -80,6 +80,27 @@ proving anything — each one makes a piece of the process *observable*.
 - **Honest scope:** the roofline uses textbook order-of-magnitude landmarks (Landauer and
   Margolus–Levitin are first-principles; the rest are device estimates).
 
+### Phase 8 — The dynamical (reservoir) face ✅  *(see [results](results/PHASE8-results.md))*
+- **Understood:** *matter computes in time, not just at rest.* The Ising substrate driven as a
+  physical reservoir has a measurable compute capacity that peaks at the **edge of chaos**.
+- **Built:** `drift/reservoir.py` — `IsingReservoir` (spectral radius set via the **Spectra**
+  spine), Jaeger **memory capacity**, **separation**, and kernel/generalization rank.
+- **Validated:** MC = 43.5 at N=200, peaking at spectral radius ρ ≈ 1.0; DRIFT's first
+  automated suite (`tests/test_reservoir.py`, 5/5). **Figure:** `figures/phase8_reservoir.png`.
+
+### Phase 9 — The optimization face, run quantum ✅  *(see [results](results/PHASE9-results.md))*
+- **Understood:** *the Phase-2 ground state, reached by quantum adiabatic evolution — and its
+  cost is the spectral gap, not cleverness.* Quantum annealing is not magic: when the gap
+  closes, it fails too.
+- **Built:** `drift/anneal.py` — `H(s) = (1−s)(−ΣXᵢ) + s·H_problem` with a diagonal
+  `H_problem` built straight from `IsingModel.energy`; `spectral_gap_path`, real-time
+  `quantum_anneal` (Krylov `expm_multiply`), `success_probability`.
+- **Validated:** slow anneal → ground state (success ≈ 1.00), sudden quench fails (< 0.01);
+  shrinking Δ_min 0.96 → 0.27 drops success 0.99 → 0.60 at fixed T (the honest gap-bounded
+  limit). `tests/test_anneal.py`, 5/5. **Figure:** `figures/phase9_quantum_anneal.png`.
+- **Honest scope:** the mechanism on small `n` (exact state-vector), **not** a speed claim over
+  classical SA; the closing-gap problem is the deliberate falsifier.
+
 ---
 
 ## Out of scope (on purpose)
