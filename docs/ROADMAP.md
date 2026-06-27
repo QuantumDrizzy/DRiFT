@@ -113,6 +113,18 @@ proving anything — each one makes a piece of the process *observable*.
 - **Honest scope:** the well-understood tunnelling-vs-barrier effect on small `n` — *not* a
   "quantum supremacy" claim; wide barriers and closing gaps give the quantum route no edge.
 
+### Phase 11 — Factoring as an Ising ground state ✅  *(see [results](results/PHASE11-results.md))*
+- **Understood:** *matter computing arithmetic* — encode `p·q = N` so the energy minimum *is*
+  the factorization. The optimization face (Phase 2) pointed at number theory.
+- **Built:** `drift/factoring.py` — `factoring_qubo` (odd-factor binary encoding, products
+  linearised by AND-gadget auxiliaries, objective `(N−p·q)²`) and `factor` (QUBO → Ising →
+  exact ground state → decode). Energy is exactly 0 at a valid factorization.
+- **Validated:** DRIFT's engine factors `15, 35, 143, … 221 = 13×17` (energy 0); the QUBO's own
+  brute-force minimum agrees; and `factor(143)` with default widths *raises* (23 > 22 vars) —
+  the construction is honest about its wall. `tests/test_factoring.py`, 5/5.
+- **Honest scope:** a demonstration of the principle on small semiprimes, **not** a cryptographic
+  attack — it scales exponentially, which is exactly why RSA is safe (`figures/phase11_factoring.png`).
+
 ---
 
 ## Out of scope (on purpose)

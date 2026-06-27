@@ -69,9 +69,9 @@ DRIFT/
 
 ## Status
 
-**Phases P0–P10 landed.** The engine, the four ground-state faces, the synthesis,
-the *dynamical* face, the optimization face run *quantum*, and the honest quantum-vs-classical
-comparison:
+**Phases P0–P11 landed.** The engine, the four ground-state faces, the synthesis,
+the *dynamical* face, the optimization face run *quantum*, the honest quantum-vs-classical
+comparison, and arithmetic as a ground state:
 
 - P0 — scaffolding · P1 — engine + observability · P2 — optimization (MaxCut) ·
   P3 — quantum ground state + χ thermometer · P4 — Hopfield memory · P5 — Wang-tile
@@ -96,10 +96,17 @@ comparison:
   a plain funnel both win (≈1.0), and a taller spike costs QA too. **The quantum edge is
   specific (a thin tunnelable barrier), not general** (`tests/test_tunneling.py`, 4/4;
   `figures/phase10_tunneling.png`).
+- **P11 — factoring as a ground state** (`drift/factoring.py`): the boldest "matter computes"
+  demo — encode `p·q = N` as a QUBO whose **ground state reveals the factors** (the energy
+  minimum *is* the arithmetic). DRIFT's own Ising engine factors `15, 35, 143, … 221 = 13×17`,
+  energy exactly 0 at each. **Honestly bounded:** the construction *raises* past the exact
+  engine's reach — the variable count and shrinking gap are why factoring stays hard and RSA is
+  safe. A principle, measured, **not an attack** (`tests/test_factoring.py`, 5/5;
+  `figures/phase11_factoring.png`).
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..10}-results.md`.
+[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..11}-results.md`.
 
 ## Results (the figures)
 
@@ -130,7 +137,13 @@ advantage is specific, not general:
 
 ![Quantum vs simulated annealing on the spike](figures/phase10_tunneling.png)
 
-Per-phase write-ups (P1–P10) live in [`docs/results/`](docs/results/).
+**Factoring as a ground state** — DRIFT factors small semiprimes by relaxing a spin system to
+its energy minimum; the variable count grows slowly but the search space explodes, which is
+exactly why it stays a demonstration and not an attack:
+
+![Factoring as a ground state, and its wall](figures/phase11_factoring.png)
+
+Per-phase write-ups (P1–P11) live in [`docs/results/`](docs/results/).
 
 ## Stack
 
