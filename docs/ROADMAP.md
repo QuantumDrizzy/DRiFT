@@ -101,6 +101,18 @@ proving anything — each one makes a piece of the process *observable*.
 - **Honest scope:** the mechanism on small `n` (exact state-vector), **not** a speed claim over
   classical SA; the closing-gap problem is the deliberate falsifier.
 
+### Phase 10 — Quantum vs simulated annealing, honestly ✅  *(see [results](results/PHASE10-results.md))*
+- **Understood:** *the deferred question — is quantum better? — answered honestly: it depends on
+  what is hard.* The quantum edge is specific (a thin tunnelable barrier), not general.
+- **Built:** `drift/tunneling.py` — both annealers on the *same* landscape: `hamming_cost_energies`
+  (a Hamming-weight funnel with an optional thin Farhi **spike**), `metropolis_sa` (single-spin-
+  flip), and the Phase-9 `quantum_anneal` for the quantum side.
+- **Validated:** on the spike, SA is walled out (success 0.17) while QA tunnels it (0.45 at T=40,
+  ~2.6×); on the funnel neither has an edge (≈1.0); a taller spike costs QA too. `tests/
+  test_tunneling.py`, 4/4 (deterministic). **Figure:** `figures/phase10_tunneling.png`.
+- **Honest scope:** the well-understood tunnelling-vs-barrier effect on small `n` — *not* a
+  "quantum supremacy" claim; wide barriers and closing gaps give the quantum route no edge.
+
 ---
 
 ## Out of scope (on purpose)

@@ -69,8 +69,9 @@ DRIFT/
 
 ## Status
 
-**Phases P0–P9 landed.** The engine, the four ground-state faces, the synthesis,
-the *dynamical* face, and now the optimization face run *quantum*:
+**Phases P0–P10 landed.** The engine, the four ground-state faces, the synthesis,
+the *dynamical* face, the optimization face run *quantum*, and the honest quantum-vs-classical
+comparison:
 
 - P0 — scaffolding · P1 — engine + observability · P2 — optimization (MaxCut) ·
   P3 — quantum ground state + χ thermometer · P4 — Hopfield memory · P5 — Wang-tile
@@ -89,10 +90,16 @@ the *dynamical* face, and now the optimization face run *quantum*:
   honest limit, measured: shrinking the gap (`Δ_min` 0.96 → 0.27) drops success (0.99 → 0.60
   at fixed T) — **quantum annealing pays the spectral gap; when it closes, QA fails too. No
   magic** (`tests/test_anneal.py`, 5/5; `figures/phase9_quantum_anneal.png`).
+- **P10 — quantum vs simulated annealing, honestly** (`drift/tunneling.py`): both annealers on
+  the *same* landscape. On a thin Hamming-weight **spike**, single-spin-flip SA is **walled out
+  (success 0.17)** while quantum annealing **tunnels it (0.45 at T=40, a ~2.6× edge)** — but on
+  a plain funnel both win (≈1.0), and a taller spike costs QA too. **The quantum edge is
+  specific (a thin tunnelable barrier), not general** (`tests/test_tunneling.py`, 4/4;
+  `figures/phase10_tunneling.png`).
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..9}-results.md`.
+[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..10}-results.md`.
 
 ## Results (the figures)
 
@@ -117,7 +124,13 @@ closes, quantum annealing fails too):
 
 ![Quantum annealing and the spectral gap](figures/phase9_quantum_anneal.png)
 
-Per-phase write-ups (P1–P9) live in [`docs/results/`](docs/results/).
+**Quantum vs simulated annealing** — on a thin barrier (the spike) quantum annealing tunnels
+where single-spin-flip SA is walled out; on a plain funnel neither has an edge. The quantum
+advantage is specific, not general:
+
+![Quantum vs simulated annealing on the spike](figures/phase10_tunneling.png)
+
+Per-phase write-ups (P1–P10) live in [`docs/results/`](docs/results/).
 
 ## Stack
 
