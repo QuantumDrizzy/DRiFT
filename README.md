@@ -69,9 +69,9 @@ DRIFT/
 
 ## Status
 
-**Phases P0–P11 landed.** The engine, the four ground-state faces, the synthesis,
+**Phases P0–P12 landed.** The engine, the four ground-state faces, the synthesis,
 the *dynamical* face, the optimization face run *quantum*, the honest quantum-vs-classical
-comparison, and arithmetic as a ground state:
+comparison, arithmetic as a ground state, and universal computation:
 
 - P0 — scaffolding · P1 — engine + observability · P2 — optimization (MaxCut) ·
   P3 — quantum ground state + χ thermometer · P4 — Hopfield memory · P5 — Wang-tile
@@ -103,10 +103,16 @@ comparison, and arithmetic as a ground state:
   engine's reach — the variable count and shrinking gap are why factoring stays hard and RSA is
   safe. A principle, measured, **not an attack** (`tests/test_factoring.py`, 5/5;
   `figures/phase11_factoring.png`).
+- **P12 — universal computation** (`drift/circuits.py`): logic gates synthesised as QUBO
+  penalties and **composed by sharing wires**, so any Boolean circuit is a ground state. DRIFT's
+  engine computes a **1-bit full adder**'s entire truth table (all 8 inputs → correct sum/cout,
+  penalty 0); XOR built by composition; forcing a wrong output costs energy. AND/OR/NOT are
+  complete → genuine universality, bounded by the same honest wall (`tests/test_circuits.py`,
+  5/5; `figures/phase12_universal.png`).
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..11}-results.md`.
+[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..12}-results.md`.
 
 ## Results (the figures)
 
@@ -143,7 +149,13 @@ exactly why it stays a demonstration and not an attack:
 
 ![Factoring as a ground state, and its wall](figures/phase11_factoring.png)
 
-Per-phase write-ups (P1–P11) live in [`docs/results/`](docs/results/).
+**Universal computation** — logic gates composed into a 1-bit full adder; DRIFT's ground-state
+engine computes its whole truth table. Any Boolean function is a ground state, bounded by the
+same wall:
+
+![A full adder computed as a ground state](figures/phase12_universal.png)
+
+Per-phase write-ups (P1–P12) live in [`docs/results/`](docs/results/).
 
 ## Stack
 

@@ -125,6 +125,19 @@ proving anything — each one makes a piece of the process *observable*.
 - **Honest scope:** a demonstration of the principle on small semiprimes, **not** a cryptographic
   attack — it scales exponentially, which is exactly why RSA is safe (`figures/phase11_factoring.png`).
 
+### Phase 12 — Universal computation as a ground state ✅  *(see [results](results/PHASE12-results.md))*
+- **Understood:** *matter computing any function* — logic gates synthesised as QUBO penalties and
+  composed by sharing wires; AND/OR/NOT are complete, so any Boolean circuit is a ground state.
+- **Built:** `drift/circuits.py` — primitive gates from `inverse_logic.synthesize`, a `Circuit`
+  that sums gate penalties over named wires (`add`, `add_xor` by composition), and `evaluate`
+  that clamps inputs and reads the output from DRIFT's exact ground state. `full_adder` wires
+  (a, b, cin) → (sum, cout).
+- **Validated:** the full adder computes all 8 inputs correctly (penalty 0); XOR by composition;
+  a forced-wrong output costs energy; a 2-bit ripple adder exceeds the engine (honest wall).
+  `tests/test_circuits.py`, 5/5. **Figure:** `figures/phase12_universal.png`.
+- **Honest scope:** the principle is universal; the demonstration is a 1-bit adder because the
+  state space is exponential in the variable count — the computronium thesis, measured, not oversold.
+
 ---
 
 ## Out of scope (on purpose)
