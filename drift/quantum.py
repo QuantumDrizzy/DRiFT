@@ -18,8 +18,14 @@ and disordered phases and **peaks at the quantum phase transition** (Γ ≈ J), 
 where the state is hardest to compress. That is the Blaze lesson — χ-truncation is
 information budgeting — turned into a probe of physical computation.
 
-Exact only: tractable to ~14 spins (2¹⁴ = 16 384). The honest baseline, not a scalable
-solver — a real DMRG/tensor-network solver is the Rust/CUDA story, deferred on purpose.
+Exact only: tractable to ~14 spins (2¹⁴ = 16 384). This is the honest *baseline* — the full
+2ⁿ state, from which χ is read off exactly. The scalable counterpart lives in `drift.mps`
+(Phase 13): a matrix-product-state solver that finds the ground state by imaginary-time
+evolution and reaches n = 64+, with χ as its own truncation budget rather than a measurement
+taken after the fact. Use this module as the small-n reference the MPS solver is validated
+against; use `drift.mps` when you need to go past the wall. (A GPU/Rust port is the next
+scaling story; the Python MPS reference is what finally delivers the "read with tensor
+networks" thesis.)
 """
 
 from __future__ import annotations

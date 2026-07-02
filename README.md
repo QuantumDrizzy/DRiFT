@@ -69,9 +69,10 @@ DRIFT/
 
 ## Status
 
-**Phases P0–P12 landed.** The engine, the four ground-state faces, the synthesis,
+**Phases P0–P13 landed.** The engine, the four ground-state faces, the synthesis,
 the *dynamical* face, the optimization face run *quantum*, the honest quantum-vs-classical
-comparison, arithmetic as a ground state, and universal computation:
+comparison, arithmetic as a ground state, universal computation, and — at last — the
+tensor-network solver that reads a ground state the way the thesis always promised:
 
 - P0 — scaffolding · P1 — engine + observability · P2 — optimization (MaxCut) ·
   P3 — quantum ground state + χ thermometer · P4 — Hopfield memory · P5 — Wang-tile
@@ -109,10 +110,17 @@ comparison, arithmetic as a ground state, and universal computation:
   penalty 0); XOR built by composition; forcing a wrong output costs energy. AND/OR/NOT are
   complete → genuine universality, bounded by the same honest wall (`tests/test_circuits.py`,
   5/5; `figures/phase12_universal.png`).
+- **P13 — the tensor-network ground state** (`drift/mps.py`): the microscope's lens becomes the
+  engine. An **MPS solver** finds the ground state by imaginary-time TEBD, so the bond dimension
+  χ that was Phase 3's *thermometer* is now the solver's own *compute budget* — the truncation
+  **is** the physics. Matches exact Lanczos to **5.8e-5**, is a variational upper bound,
+  **reproduces Phase 3's χ peak independently** (Γ≈0.77, χ=6), and runs **past the exact wall**:
+  n=48 (2⁴⁸≈2.8×10¹⁴ states) with E/n → −4/π. The "read with tensor networks" thesis, finally
+  delivered (`tests/test_mps.py`, 7/7; `figures/phase13_tensor.png`).
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..12}-results.md`.
+[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..13}-results.md`.
 
 ## Results (the figures)
 

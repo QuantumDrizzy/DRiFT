@@ -138,6 +138,23 @@ proving anything — each one makes a piece of the process *observable*.
 - **Honest scope:** the principle is universal; the demonstration is a 1-bit adder because the
   state space is exponential in the variable count — the computronium thesis, measured, not oversold.
 
+### Phase 13 — The tensor-network ground state ✅  *(see [results](results/PHASE13-results.md))*
+- **Understood:** *the microscope's lens is finally the engine.* Through Phase 12 χ was only ever
+  *measured*, after an exact 2ⁿ diagonalization (Phase 3). Here an MPS solver finds the ground
+  state itself by imaginary-time TEBD, and the same χ that was the thermometer becomes the
+  compute budget — the truncation *is* the physics. This delivers the README's "read with tensor
+  networks" thesis, at last.
+- **Built:** `drift/mps.py` — imaginary-time TEBD on a matrix-product state (nearest-neighbor
+  two-site gates, SVD truncation to χ, robust center-moving canonical form, no Λ⁻¹). χ reported
+  with Phase 3's `effective_chi` ruler. `experiments/phase13_tensor.py`, `tests/test_mps.py`.
+- **Validated:** vs exact Lanczos across the phase diagram, worst error **5.8e-5** (target 1e-3);
+  energy is a variational upper bound; **reproduces Phase 3's χ peak independently** (Γ≈0.77, χ=6
+  at finite size); and runs **past the exact wall** — n=48 (2⁴⁸≈2.8e14 states) with E/n → −4/π as
+  n grows. `tests/test_mps.py`, 7/7. **Figure:** `figures/phase13_tensor.png`.
+- **Honest scope:** the CPU 1-D **reference** solver — exact while χ ≤ chi_max, degrading
+  *measurably* (χ pinned, entropy rising) at criticality where entanglement outgrows the budget.
+  Higher-D / large-χ / GPU is the still-deferred Rust/CUDA story; the thesis is no longer deferred.
+
 ---
 
 ## Out of scope (on purpose)
