@@ -155,6 +155,20 @@ proving anything — each one makes a piece of the process *observable*.
   *measurably* (χ pinned, entropy rising) at criticality where entanglement outgrows the budget.
   Higher-D / large-χ / GPU is the still-deferred Rust/CUDA story; the thesis is no longer deferred.
 
+### Phase 14 — The GPU Ising engine (parallel tempering) 🔄  *(CPU reference ✅; [results](results/PHASE14-results.md), [ADR-0004](ADR-0004-gpu-ising-engine.md))*
+- **Understood:** *the substrate, run at scale.* Scales the **optimization face** (MaxCut, factoring,
+  circuits, crystals, Hopfield — any `IsingModel`) from the ~22-spin exact wall to thousands of spins
+  by **parallel tempering** (replica-exchange Metropolis) on the GPU.
+- **Built:** `drift/solvers/parallel_tempering.py` (CPU reference + oracle), `cuda/ising_pt.cu`
+  (one block per replica, local-field maintenance, coalesced updates via J-symmetry, temperature-swap
+  exchange, cuRAND; `nvcc -arch=sm_120`), `drift/gpu.py` (drop-in glue), `experiments/phase14_gpu.py`.
+- **Validated (CPU, 5/5; full suite 63/63):** finds the **exact** ground energy on MaxCut, a ±J spin
+  glass, and a ferromagnet; replica exchange beats a lone cold walker; healthy ladder. **GPU: pending
+  on-device build/benchmark** — the acceptance test is the first `phase14_gpu` run reproducing those
+  exact energies, then throughput (Gflips/s) to n=2048. No GPU speed is claimed until measured.
+- **Honest scope:** strong minima, not certified optima (the exact engine stays the oracle on small n);
+  dense-J, modest replica counts. Sparse-J / multi-GPU / routing `factor()` through it = future.
+
 ---
 
 ## Out of scope (on purpose)

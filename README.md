@@ -117,6 +117,13 @@ tensor-network solver that reads a ground state the way the thesis always promis
   **reproduces Phase 3's χ peak independently** (Γ≈0.77, χ=6), and runs **past the exact wall**:
   n=48 (2⁴⁸≈2.8×10¹⁴ states) with E/n → −4/π. The "read with tensor networks" thesis, finally
   delivered (`tests/test_mps.py`, 7/7; `figures/phase13_tensor.png`).
+- **P14 — the GPU Ising engine** (`cuda/ising_pt.cu`, `drift/gpu.py`) — *CPU reference landed, GPU
+  benchmark pending on-device.* Scales the **optimization face** past the ~22-spin exact wall by
+  **parallel tempering** (replica-exchange Metropolis) on the GPU. The CPU reference
+  (`drift/solvers/parallel_tempering.py`) finds the **exact** ground energy on MaxCut, a ±J spin
+  glass, and a ferromagnet (`tests/test_parallel_tempering.py`, 5/5); the CUDA engine mirrors it
+  (one block per replica, `nvcc -arch=sm_120`) and is validated by reproducing those exact energies
+  on the first on-device run before any throughput is claimed (`docs/ADR-0004`).
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
