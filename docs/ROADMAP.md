@@ -175,8 +175,13 @@ proving anything — each one makes a piece of the process *observable*.
   colour-steps, not n serial flips. The serial-flip latency wall is gone; throughput now **rises with
   n** and reaches **n=8192**. **~0.93 Gflips/s @ n=2048 — ~21× the first build, ~5× less wall time**,
   exact −22/−33 preserved. Full arc measured in [results](results/PHASE14-results.md).
-- **Next:** more GPU headroom (recompute energy less often, coalesce colour reads, warp-per-replica);
-  route `factor()` / large MaxCut through the engine; multi-GPU.
+- **Phase 14d done — warp per replica:** one warp (32 lanes) per replica instead of a 256-thread
+  block, so the colour barrier is a near-free `__syncwarp` and the energy reduction is a shuffle, and
+  many more replicas run at once. **Breaks 1 Gflips/s** (1.03 @ n=2048, R=256; ~1.13 @ R=512), exact
+  −22/−33 preserved. Honest trade: worse than 14c at low R (under-fills the GPU), better in the
+  many-replica regime PT wants. Net arc **~0.044 → ~1.1 Gflips/s (~25×)**.
+- **Next:** recompute energy less often; coalesce colour reads; multi-GPU; route `factor()` / large
+  MaxCut through the engine.
 - **Honest scope:** strong minima, not certified optima (the exact engine stays the oracle on small n).
 
 ---

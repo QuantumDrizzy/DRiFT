@@ -4,18 +4,14 @@
 // it reproduces the exact ground energy on the small instances the exact engine can solve
 // (see cuda/README.md). Build with cuda/build.bat (nvcc, sm_120).
 //
-// Phase 14c — CHECKERBOARD / graph-colouring parallel updates. Single-spin-flip is serial (flipping
-// i changes its neighbours' fields), which left the engine latency-bound. But two spins that are
-// NOT adjacent can flip at the same time. So the graph is greedily coloured into independent sets
-// (no edge within a colour), and a whole colour flips in parallel: each of its spins reads its
-// neighbours' *current* spins (all in other colours, hence stable), scores dE = 2 s_i (Σ_{j~i} J_ij
-// s_j + h_i), and decides independently. A sweep is then k colour-steps (k = #colours, small for a
-// sparse graph) instead of n serial flips — the latency wall of Phase 14b, removed.
-//
-// No stored field: dE is recomputed from CSR neighbours each time (they're stable within a colour).
-// Energy is recomputed exactly (O(nnz)) once per sweep for replica exchange + best-tracking, so
-// best_E is always the true energy of best_s (no incremental fp drift) — which the exact-match
-// acceptance test needs. One CUDA block per replica; one cuRAND state per thread.
+// Phase 14c gave parallel spin updates via graph-colouring (a whole independent set flips at once).
+// Phase 14d — WARP PER REPLICA: instead of a whole 256-thread block per replica, one warp (32
+// lanes) drives a replica, so a block holds 8 replicas. Wins: the per-colour barrier is a
+// __syncwarp (implicit-lockstep, near-free) instead of a block-wide __syncthreads; the energy
+// reduction is a warp shuffle instead of a shared-memory reduction; and far more replicas run
+// concurrently (finer PT ladder + fuller GPU). The graph-colouring invariant is unchanged: within a
+// colour no two spins are adjacent, so they flip independently. No stored field (dE recomputed from
+// CSR neighbours); energy recomputed exactly per sweep so best_E never drifts (the exact-match test).
 
 #include <cstdio>
 #include <cstdlib>
@@ -26,7 +22,10 @@
 #include <chrono>
 #include <curand_kernel.h>
 
-#define BDIM 256   // block size (power of two — the energy reduction needs it)
+#define WARP 32
+#define WARPS_PER_BLOCK 8
+#define BDIM (WARP * WARPS_PER_BLOCK)   // 256
+#define FULL 0xffffffffu
 
 #define CUDA_CHECK(call)                                                              \
     do {                                                                             \
@@ -43,7 +42,7 @@
 //   int32  n, R, n_rounds, sweeps_per_round, nnz, k
 //   float  T_min, T_max
 //   int32  row_ptr[n+1] · col_idx[nnz] · float weight[nnz] · float h[n]
-//   int32  color_ptr[k+1] · color_spins[n]   (spins grouped by colour)
+//   int32  color_ptr[k+1] · color_spins[n]
 
 __device__ __forceinline__ double neigh_sum(int i, const int* rowPtr, const int* colIdx,
                                              const float* weight, const float* sr) {
@@ -52,78 +51,75 @@ __device__ __forceinline__ double neigh_sum(int i, const int* rowPtr, const int*
     return acc;
 }
 
-// E = -0.5 Σ_i s_i (Σ_{j~i} J_ij s_j) - Σ_i h_i s_i   (block reduction over spins)
+__device__ __forceinline__ double warp_reduce(double v) {
+    for (int off = WARP / 2; off > 0; off >>= 1) v += __shfl_down_sync(FULL, v, off);
+    return v;   // valid in lane 0
+}
+
+// E = -0.5 Σ_i s_i (Σ_{j~i} J_ij s_j) - Σ_i h_i s_i   (warp reduction; result in lane 0)
 __device__ double replica_energy(const int* rowPtr, const int* colIdx, const float* weight,
-                                 const float* h, const float* sr, int n, double* red) {
-    int tid = threadIdx.x;
+                                 const float* h, const float* sr, int n, int lane) {
     double acc = 0.0;
-    for (int i = tid; i < n; i += BDIM) {
+    for (int i = lane; i < n; i += WARP) {
         double si = sr[i];
         acc += -0.5 * si * neigh_sum(i, rowPtr, colIdx, weight, sr) - (double)h[i] * si;
     }
-    red[tid] = acc;
-    __syncthreads();
-    for (int off = BDIM / 2; off > 0; off >>= 1) {
-        if (tid < off) red[tid] += red[tid + off];
-        __syncthreads();
-    }
-    return red[0];
+    return warp_reduce(acc);
 }
 
 __global__ void init_kernel(const int* rowPtr, const int* colIdx, const float* weight,
                             const float* h, float* s, double* E, double* bestE, float* bestS,
-                            curandState* states, int n, uint64_t seed) {
-    int r = blockIdx.x, tid = threadIdx.x;
-    int gid = r * BDIM + tid;
+                            curandState* states, int n, int R, uint64_t seed) {
+    int r = blockIdx.x * WARPS_PER_BLOCK + (threadIdx.x / WARP);
+    if (r >= R) return;
+    int lane = threadIdx.x & (WARP - 1);
+    int gid = r * WARP + lane;
     curand_init(seed, gid, 0, &states[gid]);
     float* sr = &s[(size_t)r * n];
-    for (int i = tid; i < n; i += BDIM) sr[i] = (curand(&states[gid]) & 1) ? 1.0f : -1.0f;
-    __syncthreads();
-
-    __shared__ double red[BDIM];
-    double e = replica_energy(rowPtr, colIdx, weight, h, sr, n, red);
-    if (tid == 0) { E[r] = e; bestE[r] = e; }
-    for (int i = tid; i < n; i += BDIM) bestS[(size_t)r * n + i] = sr[i];
+    for (int i = lane; i < n; i += WARP) sr[i] = (curand(&states[gid]) & 1) ? 1.0f : -1.0f;
+    __syncwarp();
+    double e = replica_energy(rowPtr, colIdx, weight, h, sr, n, lane);
+    if (lane == 0) { E[r] = e; bestE[r] = e; }
+    for (int i = lane; i < n; i += WARP) bestS[(size_t)r * n + i] = sr[i];
 }
 
 __global__ void sweep_kernel(const int* rowPtr, const int* colIdx, const float* weight,
                              const float* h, const int* colorPtr, const int* colorSpins, int k,
                              float* s, double* E, double* bestE, float* bestS, const float* beta,
-                             curandState* states, int n, int sweeps) {
-    int r = blockIdx.x, tid = threadIdx.x;
-    int gid = r * BDIM + tid;
+                             curandState* states, int n, int R, int sweeps) {
+    int r = blockIdx.x * WARPS_PER_BLOCK + (threadIdx.x / WARP);
+    if (r >= R) return;
+    int lane = threadIdx.x & (WARP - 1);
+    int gid = r * WARP + lane;
     float invT = beta[r];
     curandState st = states[gid];
     float* sr = &s[(size_t)r * n];
 
     for (int sw = 0; sw < sweeps; ++sw) {
         for (int c = 0; c < k; ++c) {
-            // every spin of colour c, in parallel — its neighbours are other colours (stable)
-            for (int idx = colorPtr[c] + tid; idx < colorPtr[c + 1]; idx += BDIM) {
+            for (int idx = colorPtr[c] + lane; idx < colorPtr[c + 1]; idx += WARP) {
                 int i = colorSpins[idx];
                 double local = (double)h[i] + neigh_sum(i, rowPtr, colIdx, weight, sr);
                 double dE = 2.0 * (double)sr[i] * local;
                 if (dE <= 0.0 || curand_uniform(&st) < expf((float)(-dE * invT))) sr[i] = -sr[i];
             }
-            __syncthreads();   // finish this colour before the next reads it
+            __syncwarp();   // finish this colour before the next lane reads it
         }
     }
     states[gid] = st;
 
-    // exact energy for swap + best (no incremental drift)
-    __shared__ double red[BDIM];
-    double e = replica_energy(rowPtr, colIdx, weight, h, sr, n, red);
-    __shared__ int improve;
-    if (tid == 0) { E[r] = e; improve = (e < bestE[r]) ? 1 : 0; if (improve) bestE[r] = e; }
-    __syncthreads();
-    if (improve) for (int i = tid; i < n; i += BDIM) bestS[(size_t)r * n + i] = sr[i];
+    double e = replica_energy(rowPtr, colIdx, weight, h, sr, n, lane);   // exact, in lane 0
+    int improve = 0;
+    if (lane == 0) { E[r] = e; improve = (e < bestE[r]) ? 1 : 0; if (improve) bestE[r] = e; }
+    improve = __shfl_sync(FULL, improve, 0);
+    if (improve) for (int i = lane; i < n; i += WARP) bestS[(size_t)r * n + i] = sr[i];
 }
 
 __global__ void swap_kernel(double* E, float* beta, curandState* states, int R, int parity) {
     int t = threadIdx.x, r = 2 * t + parity;
     if (r + 1 >= R) return;
     double d = ((double)beta[r] - (double)beta[r + 1]) * (E[r] - E[r + 1]);
-    float u = curand_uniform(&states[r * BDIM]);
+    float u = curand_uniform(&states[r * WARP]);
     if (d >= 0.0 || u < expf((float)d)) { float tmp = beta[r]; beta[r] = beta[r + 1]; beta[r + 1] = tmp; }
 }
 
@@ -174,7 +170,7 @@ int main(int argc, char** argv) {
     CUDA_CHECK(cudaMalloc(&dE, R * sizeof(double)));
     CUDA_CHECK(cudaMalloc(&dbestE, R * sizeof(double)));
     CUDA_CHECK(cudaMalloc(&dbeta, R * sizeof(float)));
-    CUDA_CHECK(cudaMalloc(&dstates, (size_t)R * BDIM * sizeof(curandState)));
+    CUDA_CHECK(cudaMalloc(&dstates, (size_t)R * WARP * sizeof(curandState)));
     CUDA_CHECK(cudaMemcpy(dRowPtr, rowPtr_h, (size_t)(n + 1) * sizeof(int), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(dColIdx, colIdx_h, (size_t)nnz * sizeof(int), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(dWeight, weight_h, (size_t)nnz * sizeof(float), cudaMemcpyHostToDevice));
@@ -183,13 +179,14 @@ int main(int argc, char** argv) {
     CUDA_CHECK(cudaMemcpy(dColorSpins, colorSpins_h, (size_t)n * sizeof(int), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(dbeta, beta.data(), R * sizeof(float), cudaMemcpyHostToDevice));
 
-    init_kernel<<<R, BDIM>>>(dRowPtr, dColIdx, dWeight, dh, ds, dE, dbestE, dbestS, dstates, n, seed);
+    int blocks = (R + WARPS_PER_BLOCK - 1) / WARPS_PER_BLOCK;
+    init_kernel<<<blocks, BDIM>>>(dRowPtr, dColIdx, dWeight, dh, ds, dE, dbestE, dbestS, dstates, n, R, seed);
     CUDA_CHECK(cudaDeviceSynchronize());
 
     auto t0 = std::chrono::high_resolution_clock::now();
     for (int rnd = 0; rnd < n_rounds; ++rnd) {
-        sweep_kernel<<<R, BDIM>>>(dRowPtr, dColIdx, dWeight, dh, dColorPtr, dColorSpins, k,
-                                  ds, dE, dbestE, dbestS, dbeta, dstates, n, sweeps_per_round);
+        sweep_kernel<<<blocks, BDIM>>>(dRowPtr, dColIdx, dWeight, dh, dColorPtr, dColorSpins, k,
+                                       ds, dE, dbestE, dbestS, dbeta, dstates, n, R, sweeps_per_round);
         swap_kernel<<<1, (R + 1) / 2>>>(dE, dbeta, dstates, R, rnd & 1);
     }
     CUDA_CHECK(cudaDeviceSynchronize());

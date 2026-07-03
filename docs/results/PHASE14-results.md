@@ -96,6 +96,24 @@ Throughput now **rises with n** (bigger graphs = more spins per colour = more pa
 ~**0.94 Gflips/s**, and the engine reaches **n = 8192** (2⁸¹⁹² configurations). Correctness is intact
 — exact −22 / −33, same-quality minima.
 
+### Phase 14d — warp per replica (breaking 1 Gflips/s)
+
+Phase 14c used a whole 256-thread **block** per replica. Phase 14d drops to one **warp** (32 lanes)
+per replica, 8 replicas per block. The per-colour barrier becomes a `__syncwarp` (implicit-lockstep,
+near-free) instead of a block-wide `__syncthreads`, and the energy reduction is a warp shuffle
+instead of a shared-memory reduction. A replica is now *cheap*, so many more run concurrently.
+
+Honest trade-off: a warp gives less *intra*-replica parallelism, so at a low replica count 14d is
+**slower** than 14c (0.51 vs 0.93 Gflips/s at R=128 — the GPU is under-filled). Its regime is **many
+replicas** — which is what a fine PT ladder wants anyway. At **R = 256** (its sweet spot) it breaks
+**1 Gflips/s** and finds slightly deeper minima (more rungs):
+
+| n | 128 | 256 | 512 | 1024 | 2048 |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| Gflips/s (R=256) | 0.83 | 0.77 | 0.89 | 0.96 | **1.03** |
+
+Peak ~**1.13 Gflips/s** at R=512. Correctness intact (exact −22 / −33).
+
 ### The whole arc, measured
 
 | build | flips/s @ n=2048 | wall @ n=2048 |
@@ -103,12 +121,14 @@ Throughput now **rises with n** (bigger graphs = more spins per colour = more pa
 | Phase 14 — dense J, R=32 | 0.044 G | 2.36 s |
 | Phase 14b — sparse-J (CSR) | 0.06 G | — |
 | Phase 14b — + R=128 occupancy | 0.22 G | 1.95 s |
-| **Phase 14c — checkerboard** | **0.93 G** | **0.45 s** |
+| Phase 14c — checkerboard (block/replica) | 0.93 G | 0.45 s |
+| **Phase 14d — warp/replica, R=256** | **1.03 G** | 0.82 s |
 
-**~21× throughput, ~5× wall time, over three measured steps — each one named the next bottleneck,
-and none claimed a speed it hadn't shown.** The microscope, pointed at itself. Further headroom
-remains (recompute the energy less often; coalesce the colour reads; warp-per-replica), but the
-serial-flip wall — the thing that made the first GPU build no faster than a CPU — is gone.
+**~0.044 → ~1.1 Gflips/s (~25×) over four measured steps — each one named the next bottleneck, and
+none claimed a speed it hadn't shown.** The microscope, pointed at itself: dense-O(n) → sparse-J →
+checkerboard parallel updates → warp-level replicas, and the exact −22 / −33 held at every step.
+Further headroom remains (recompute energy less often; coalesce colour reads; multi-GPU) — but the
+serial-flip wall that made the first GPU build no faster than a CPU is long gone.
 
 **Honest scope.** Parallel tempering finds **strong minima, not certified optima** — DRIFT is a
 microscope for computation at scale, not a SOTA solver; the certified answer stays the exact

@@ -57,11 +57,13 @@ print(res.best_E, res.throughput, "flips/s")
 
 ## Honest scope
 
-- J is stored **sparse (CSR)** and spins are updated by **checkerboard / graph-colouring** — a whole
-  independent set flips in parallel, so a sweep is k colour-steps, not n serial flips. Use ~128
-  replicas to fill the GPU (measured sweet spot). ~0.93 Gflips/s @ n=2048, scales to n=8192, exact
-  ground energies preserved. Further headroom (recompute energy less often, coalesced colour reads,
-  warp-per-replica) and multi-GPU are future work.
+- J is stored **sparse (CSR)**; spins are updated by **checkerboard / graph-colouring** (a whole
+  independent set flips in parallel, so a sweep is k colour-steps not n serial flips); and a replica
+  is driven by **one warp** (near-free `__syncwarp` barriers + shuffle energy reduction). Use **~256
+  replicas** (warp-per-replica's sweet spot — a replica is cheap, so many fill the GPU and make a
+  finer PT ladder). **~1.03 Gflips/s @ n=2048** (~1.13 @ R=512), scales to n=8192, exact ground
+  energies preserved. Further headroom (recompute energy less often, coalesced colour reads) and
+  multi-GPU are future work.
 - Parallel tempering finds **strong minima**, not certified optima — DRIFT is a microscope for
   computation at scale, not a solver competing for SOTA. The certified answer is the exact engine's,
   on the small n where the two are cross-checked.
