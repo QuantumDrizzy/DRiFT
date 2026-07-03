@@ -95,22 +95,30 @@ __global__ void sweep_kernel(const int* rowPtr, const int* colIdx, const float* 
     curandState st = states[gid];
     float* sr = &s[(size_t)r * n];
 
+    double dsum = 0.0;   // energy change accumulated from accepted flips (dE already computed)
     for (int sw = 0; sw < sweeps; ++sw) {
         for (int c = 0; c < k; ++c) {
             for (int idx = colorPtr[c] + lane; idx < colorPtr[c + 1]; idx += WARP) {
                 int i = colorSpins[idx];
                 double local = (double)h[i] + neigh_sum(i, rowPtr, colIdx, weight, sr);
                 double dE = 2.0 * (double)sr[i] * local;
-                if (dE <= 0.0 || curand_uniform(&st) < expf((float)(-dE * invT))) sr[i] = -sr[i];
+                if (dE <= 0.0 || curand_uniform(&st) < expf((float)(-dE * invT))) { sr[i] = -sr[i]; dsum += dE; }
             }
             __syncwarp();   // finish this colour before the next lane reads it
         }
     }
     states[gid] = st;
 
-    double e = replica_energy(rowPtr, colIdx, weight, h, sr, n, lane);   // exact, in lane 0
+    // Energy tracked incrementally: Σ (accepted dE) telescopes to the exact energy change, because
+    // flips within a colour are independent — so no O(nnz) recompute per round is needed.
+    double dtot = warp_reduce(dsum);   // total ΔE, in lane 0
     int improve = 0;
-    if (lane == 0) { E[r] = e; improve = (e < bestE[r]) ? 1 : 0; if (improve) bestE[r] = e; }
+    if (lane == 0) {
+        double e = E[r] + dtot;
+        E[r] = e;
+        improve = (e < bestE[r]) ? 1 : 0;
+        if (improve) bestE[r] = e;
+    }
     improve = __shfl_sync(FULL, improve, 0);
     if (improve) for (int i = lane; i < n; i += WARP) bestS[(size_t)r * n + i] = sr[i];
 }

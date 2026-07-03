@@ -105,14 +105,26 @@ instead of a shared-memory reduction. A replica is now *cheap*, so many more run
 
 Honest trade-off: a warp gives less *intra*-replica parallelism, so at a low replica count 14d is
 **slower** than 14c (0.51 vs 0.93 Gflips/s at R=128 — the GPU is under-filled). Its regime is **many
-replicas** — which is what a fine PT ladder wants anyway. At **R = 256** (its sweet spot) it breaks
-**1 Gflips/s** and finds slightly deeper minima (more rungs):
+replicas** — which is what a fine PT ladder wants anyway. At **R = 256** (its sweet spot) it runs at
+a **stable ~0.94 Gflips/s @ n=2048** (5-run median; an earlier single run read 1.03, but that was a
+boost-clock outlier — the honest, repeatable number is 0.94). Correctness intact (exact −22 / −33).
 
-| n | 128 | 256 | 512 | 1024 | 2048 |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| Gflips/s (R=256) | 0.83 | 0.77 | 0.89 | 0.96 | **1.03** |
+### Recompute energy less often — the lever that *didn't* move the needle (and why that's the result)
 
-Peak ~**1.13 Gflips/s** at R=512. Correctness intact (exact −22 / −33).
+The obvious next optimisation: the replica energy was recomputed from scratch (O(nnz)) once per
+round for the swap + best-check. That's replaced with an **incremental** energy — each accepted flip
+already computes its dE for the Metropolis test, and Σ dE telescopes to the *exact* energy change
+(flips within a colour are independent), so no per-round recompute is needed. Verified exact over
+600 rounds × 5 sweeps: `best_E` equals the true energy of `best_s` to fp precision, still matching the
+exact ground energy — **no drift**.
+
+But the **measured throughput did not change** (~0.94 Gflips/s, 5-run median, before and after). The
+honest conclusion: the energy recompute was *not* the bottleneck. The kernel is **memory-bound on the
+scattered CSR neighbour reads** — `neigh_sum` gathers `colIdx[t]`, `weight[t]`, and `sr[colIdx[t]]`
+uncoalesced for every spin. Removing the recompute is kept (it's correct, cleaner, and less work),
+but it named the *real* next lever: **coalescing / caching those neighbour reads** (reorder for
+locality, or stage the replica's spins in shared memory). Distrust the pretty number; measure, and
+let the measurement point at the truth.
 
 ### The whole arc, measured
 
@@ -122,12 +134,13 @@ Peak ~**1.13 Gflips/s** at R=512. Correctness intact (exact −22 / −33).
 | Phase 14b — sparse-J (CSR) | 0.06 G | — |
 | Phase 14b — + R=128 occupancy | 0.22 G | 1.95 s |
 | Phase 14c — checkerboard (block/replica) | 0.93 G | 0.45 s |
-| **Phase 14d — warp/replica, R=256** | **1.03 G** | 0.82 s |
+| **Phase 14d — warp/replica, R=256** | **~0.94 G** (stable) | 0.89 s |
 
-**~0.044 → ~1.1 Gflips/s (~25×) over four measured steps — each one named the next bottleneck, and
-none claimed a speed it hadn't shown.** The microscope, pointed at itself: dense-O(n) → sparse-J →
-checkerboard parallel updates → warp-level replicas, and the exact −22 / −33 held at every step.
-Further headroom remains (recompute energy less often; coalesce colour reads; multi-GPU) — but the
+**~0.044 → ~0.94 Gflips/s (~21×) over four measured steps — each one named the next bottleneck, and
+none claimed a speed it hadn't shown** (including correcting a boost-clock outlier down to the stable
+rate). The microscope, pointed at itself: dense-O(n) → sparse-J → checkerboard parallel updates →
+warp-level replicas, and the exact −22 / −33 held at every step. The next real lever is **coalescing
+the scattered CSR neighbour reads** (the kernel is memory-bound there); then multi-GPU. The
 serial-flip wall that made the first GPU build no faster than a CPU is long gone.
 
 **Honest scope.** Parallel tempering finds **strong minima, not certified optima** — DRIFT is a
