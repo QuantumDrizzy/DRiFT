@@ -7,3 +7,9 @@ dist/
 *.egg-info/
 *.npy
 .pytest_cache/
+
+# CUDA build artifacts
+cuda/*.exe
+cuda/*.exp
+cuda/*.lib
+cuda/*.pdb
