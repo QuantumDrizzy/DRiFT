@@ -170,10 +170,13 @@ proving anything — each one makes a piece of the process *observable*.
   flat in n, ~30 % faster), and R=32→128 (a finer PT ladder that also fills the SMs) adds ~4×.
   **~0.05 → ~0.23 Gflips/s, ~4–5× over the first build**, same exact energies. Measured occupancy
   curve confirmed 32 blocks left the GPU ~4× idle.
-- **Next (Phase 14c — the real GPU-Ising leap):** the engine is now **latency-bound by the serial
-  single-spin-flip** (one flip/block/step, three block syncs each). **Parallel spin updates** —
-  checkerboard / graph-colouring so a whole independent set flips at once — is where flips/s goes to
-  billions. Plus: route `factor()` / large MaxCut through the engine; multi-GPU.
+- **Phase 14c done — checkerboard / graph-colouring:** greedily colour the graph into independent
+  sets and flip a whole colour in parallel (neighbours are other colours, so stable) — a sweep is k
+  colour-steps, not n serial flips. The serial-flip latency wall is gone; throughput now **rises with
+  n** and reaches **n=8192**. **~0.93 Gflips/s @ n=2048 — ~21× the first build, ~5× less wall time**,
+  exact −22/−33 preserved. Full arc measured in [results](results/PHASE14-results.md).
+- **Next:** more GPU headroom (recompute energy less often, coalesce colour reads, warp-per-replica);
+  route `factor()` / large MaxCut through the engine; multi-GPU.
 - **Honest scope:** strong minima, not certified optima (the exact engine stays the oracle on small n).
 
 ---

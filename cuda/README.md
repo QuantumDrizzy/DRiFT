@@ -57,10 +57,11 @@ print(res.best_E, res.throughput, "flips/s")
 
 ## Honest scope
 
-- J is stored **sparse (CSR)**, so a flip is O(degree) and large sparse n is cheap; use ~128
-  replicas to fill the GPU (measured: 32 left the SMs ~4× idle). The throughput ceiling is now the
-  serial single-spin-flip (latency-bound) — parallel spin updates (checkerboard/colouring) and
-  multi-GPU are future work (Phase 14c).
+- J is stored **sparse (CSR)** and spins are updated by **checkerboard / graph-colouring** — a whole
+  independent set flips in parallel, so a sweep is k colour-steps, not n serial flips. Use ~128
+  replicas to fill the GPU (measured sweet spot). ~0.93 Gflips/s @ n=2048, scales to n=8192, exact
+  ground energies preserved. Further headroom (recompute energy less often, coalesced colour reads,
+  warp-per-replica) and multi-GPU are future work.
 - Parallel tempering finds **strong minima**, not certified optima — DRIFT is a microscope for
   computation at scale, not a solver competing for SOTA. The certified answer is the exact engine's,
   on the small n where the two are cross-checked.

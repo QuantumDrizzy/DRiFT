@@ -72,12 +72,43 @@ n=128 to 2048). Low for a GPU — and the benchmark named *why*, so two levers f
 | Gflips/s | 0.23 | 0.23 | 0.23 | 0.23 | 0.22 |
 | time (400 rounds) | 0.12 s | 0.23 s | 0.45 s | 0.93 s | 1.95 s |
 
-**~4–5× over the first build, and now n-independent** — while still reproducing the exact −22 / −33
-and the same final energies. Honest remaining ceiling: **~0.23 Gflips/s is still latency-bound** by
-the *serial single-spin-flip* (one flip per block per step, three block syncs each). The real
-GPU-Ising leap (billions of flips/s) needs **parallel spin updates** — checkerboard / graph-colouring
-so a whole independent set flips at once — which is **Phase 14c**. The microscope, pointed at itself:
-each measurement named the next bottleneck, and we fixed the two cheap ones without a false claim.
+**~4–5× over the first build, and now n-independent** — while still reproducing the exact −22 / −33.
+The remaining ceiling was the *serial single-spin-flip* (one flip per block per step) — which
+**Phase 14c** removes.
+
+### Phase 14c — checkerboard / graph-colouring (the real leap)
+
+Two spins that are **not adjacent** can flip at the same time. The graph is greedily coloured into
+independent sets (no edge within a colour), and a whole colour flips in parallel: each of its spins
+reads its neighbours' *current* spins (all other colours, so stable), scores dE, and decides
+independently. A sweep is now **k colour-steps** (k = #colours, small for a sparse graph) instead of
+n serial flips — the latency wall is gone. No stored field (dE recomputed from CSR neighbours);
+energy is recomputed exactly once per sweep, so `best_E` never drifts and the exact-match test holds.
+
+**Result (checkerboard + sparse-J + R = 128, `figures/phase14_gpu.png`):**
+
+| n | 128 | 256 | 512 | 1024 | 2048 | 4096 | 8192 |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Gflips/s | 0.53 | 0.51 | 0.67 | 0.89 | **0.93** | 0.90 | 0.64 |
+| time (400 rounds) | 0.05 s | 0.10 s | 0.16 s | 0.24 s | 0.45 s | 0.93 s | — |
+
+Throughput now **rises with n** (bigger graphs = more spins per colour = more parallel work), peaking
+~**0.94 Gflips/s**, and the engine reaches **n = 8192** (2⁸¹⁹² configurations). Correctness is intact
+— exact −22 / −33, same-quality minima.
+
+### The whole arc, measured
+
+| build | flips/s @ n=2048 | wall @ n=2048 |
+|:---|:---:|:---:|
+| Phase 14 — dense J, R=32 | 0.044 G | 2.36 s |
+| Phase 14b — sparse-J (CSR) | 0.06 G | — |
+| Phase 14b — + R=128 occupancy | 0.22 G | 1.95 s |
+| **Phase 14c — checkerboard** | **0.93 G** | **0.45 s** |
+
+**~21× throughput, ~5× wall time, over three measured steps — each one named the next bottleneck,
+and none claimed a speed it hadn't shown.** The microscope, pointed at itself. Further headroom
+remains (recompute the energy less often; coalesce the colour reads; warp-per-replica), but the
+serial-flip wall — the thing that made the first GPU build no faster than a CPU — is gone.
 
 **Honest scope.** Parallel tempering finds **strong minima, not certified optima** — DRIFT is a
 microscope for computation at scale, not a SOTA solver; the certified answer stays the exact

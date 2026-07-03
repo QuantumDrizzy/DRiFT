@@ -76,17 +76,23 @@ def parallel_tempering_gpu(
     row_ptr[1:] = np.cumsum(np.bincount(rows, minlength=n))
     nnz = int(col_idx.size)
 
+    # greedy graph colouring (independent sets) for the checkerboard parallel updates: a whole
+    # colour flips at once, so a sweep is k colour-steps instead of n serial flips.
+    k, color_ptr, color_spins = _greedy_coloring(n, row_ptr, col_idx)
+
     with tempfile.TemporaryDirectory() as d:
         prob = os.path.join(d, "problem.bin")
         res = os.path.join(d, "result.bin")
         with open(prob, "wb") as f:
-            # matches the packed header read in ising_pt.cu: <Q 5i 2f> then CSR + h
-            f.write(struct.pack("<Qiiiiiff", seed & 0xFFFFFFFFFFFFFFFF, n, n_replicas, n_rounds,
-                                sweeps_per_round, nnz, float(T_min), float(T_max)))
+            # matches the packed header read in ising_pt.cu: <Q 6i 2f> then CSR + h + colouring
+            f.write(struct.pack("<Qiiiiiiff", seed & 0xFFFFFFFFFFFFFFFF, n, n_replicas, n_rounds,
+                                sweeps_per_round, nnz, k, float(T_min), float(T_max)))
             f.write(row_ptr.tobytes())
             f.write(col_idx.tobytes())
             f.write(weight.tobytes())
             f.write(h.tobytes())
+            f.write(color_ptr.tobytes())
+            f.write(color_spins.tobytes())
 
         proc = subprocess.run([_BIN, prob, res], capture_output=True, text=True)
         if proc.returncode != 0:
@@ -111,3 +117,29 @@ def parallel_tempering_gpu(
 def _grab(text: str, pattern: str):
     m = re.search(pattern, text)
     return float(m.group(1)) if m else None
+
+
+def _greedy_coloring(n: int, row_ptr: np.ndarray, col_idx: np.ndarray):
+    """Greedy graph colouring from CSR adjacency → (k, color_ptr, color_spins).
+
+    Each spin gets the smallest colour not used by an already-coloured neighbour, so no two spins
+    of the same colour share an edge — the invariant that makes flipping a colour in parallel exact.
+    Returns k colours, CSR-style offsets `color_ptr[k+1]`, and `color_spins` (spin ids grouped by
+    colour). O(nnz); fine at these sizes.
+    """
+    color = np.full(n, -1, dtype=np.int64)
+    for i in range(n):
+        used = set()
+        for t in range(int(row_ptr[i]), int(row_ptr[i + 1])):
+            c = color[col_idx[t]]
+            if c >= 0:
+                used.add(int(c))
+        ci = 0
+        while ci in used:
+            ci += 1
+        color[i] = ci
+    k = int(color.max()) + 1 if n > 0 else 1
+    color_spins = np.argsort(color, kind="stable").astype(np.int32)
+    color_ptr = np.zeros(k + 1, dtype=np.int32)
+    color_ptr[1:] = np.cumsum(np.bincount(color, minlength=k))
+    return k, color_ptr, color_spins
