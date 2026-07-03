@@ -62,7 +62,9 @@ def main(outdir: str = "figures") -> None:
     thr = []
     for n in ns:
         model = maxcut_ising(random_graph(n, p=min(0.1, 20.0 / n), seed=0))
-        g = gpu.parallel_tempering_gpu(model, n_replicas=32, T_min=0.05, T_max=5.0,
+        # 128 replicas: a finer PT ladder *and* enough blocks to actually fill the GPU (32 left the
+        # SMs ~4x idle — measured). More rungs = better mixing, so this is a better solver too.
+        g = gpu.parallel_tempering_gpu(model, n_replicas=128, T_min=0.05, T_max=5.0,
                                        n_rounds=400, sweeps_per_round=4, seed=0)
         thr.append(g.throughput or 0.0)
         cut = cut_value(  # a concrete, human-readable readout of the solution's quality

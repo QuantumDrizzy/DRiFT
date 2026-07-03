@@ -47,31 +47,37 @@ The Phase-14 experiment confirms the CPU path matches exact on the acceptance in
 ```
 
 It scales past the exact wall (n = 128 … 2048; 2²⁰⁴⁸ configurations), returning sane MaxCut
-solutions. **Measured throughput (`figures/phase14_gpu.png`):**
+solutions.
+
+### Phase 14 → 14b: measure, find the bottleneck, fix what's cheap
+
+The first build (dense J, R = 32) measured **~0.05 Gflips/s, decaying with n** (0.059 → 0.044 from
+n=128 to 2048). Low for a GPU — and the benchmark named *why*, so two levers followed:
+
+1. **Sparse J (CSR).** A single-spin *flip* is not a unit of GPU work: each accepted flip updated an
+   O(n) field over a **dense** J row, so throughput *decayed* with n. The benchmark graphs are sparse
+   (~10 neighbours), so J is now stored as CSR and a flip touches only a spin's neighbours —
+   **O(degree), not O(n)**. Throughput went **flat in n** (the decay is gone) and wall time dropped
+   ~30 %. Correctness unchanged (same exact energies, same final E).
+2. **Occupancy.** With CSR the field work is tiny, so the engine is now **latency-bound** by the
+   serial flip (thread-0 decision + per-flip block syncs). R = 32 = 32 blocks left the SMs ~4× idle.
+   Raising to **R = 128** (a finer PT ladder, so a *better* solver too) scales throughput ~4× at
+   nearly constant wall time — measured occupancy curve at n=1024: 0.03 (R16) → 0.06 (R32) →
+   0.23 (R128) Gflips/s, wall time flat to R≈128 then saturating.
+
+**Result (sparse-J + R = 128, `figures/phase14_gpu.png`):**
 
 | n | 128 | 256 | 512 | 1024 | 2048 |
 |:---:|:---:|:---:|:---:|:---:|:---:|
-| Gflips/s | 0.059 | 0.059 | 0.053 | 0.048 | 0.044 |
-| time (400 rounds) | 0.11 s | 0.22 s | 0.49 s | 1.08 s | 2.36 s |
+| Gflips/s | 0.23 | 0.23 | 0.23 | 0.23 | 0.22 |
+| time (400 rounds) | 0.12 s | 0.23 s | 0.45 s | 0.93 s | 1.95 s |
 
-**Honest reading of the number — it is low, and *why* is the useful result.** ~0.05 Gflips/s looks
-poor for a GPU, but a single-spin *flip* is not a unit of GPU work here: each accepted flip triggers
-an O(n) field update over a **dense** J row, so at n = 2048 the engine is actually pushing on the
-order of 10¹¹ field-updates/s — real, memory-bound GPU work. Two design choices, not idle silicon,
-cap the flips/s:
-
-1. **Dense J ⇒ O(n) per flip.** The benchmark graphs are *sparse* (≈10 neighbours), yet a flip
-   touches all n fields. A **sparse-J (CSR)** representation makes a flip O(degree), not O(n) — the
-   single biggest win, and already the flagged next step.
-2. **Serial single-spin-flip + per-flip block syncs.** Within a replica, flips are sequential
-   (flipping i changes j's field), and rejected flips still pay a full block-wide sync doing nothing.
-   With only R = 32 replicas = 32 blocks, the design is latency-bound. Real speedup needs a
-   **parallel-update scheme** — checkerboard/graph-colouring (large independent sets exist for the
-   sparse graphs) or **population annealing** (thousands of one-thread walkers) to hide the latency.
-
-So Phase 14 delivers a **correct, honestly benchmarked** GPU port whose measurement *names its own
-bottleneck*: dense-O(n) flips on a latency-bound layout. That is the microscope pointed at itself —
-the next phase (sparse-J + parallel updates) is where the GPU actually earns its keep.
+**~4–5× over the first build, and now n-independent** — while still reproducing the exact −22 / −33
+and the same final energies. Honest remaining ceiling: **~0.23 Gflips/s is still latency-bound** by
+the *serial single-spin-flip* (one flip per block per step, three block syncs each). The real
+GPU-Ising leap (billions of flips/s) needs **parallel spin updates** — checkerboard / graph-colouring
+so a whole independent set flips at once — which is **Phase 14c**. The microscope, pointed at itself:
+each measurement named the next bottleneck, and we fixed the two cheap ones without a false claim.
 
 **Honest scope.** Parallel tempering finds **strong minima, not certified optima** — DRIFT is a
 microscope for computation at scale, not a SOTA solver; the certified answer stays the exact

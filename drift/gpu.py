@@ -64,17 +64,28 @@ def parallel_tempering_gpu(
         )
 
     n = model.n
-    J = np.ascontiguousarray(model.J, dtype=np.float32)   # symmetric, zero diagonal, row-major
     h = np.ascontiguousarray(model.h, dtype=np.float32)
+
+    # CSR of the symmetric, zero-diagonal coupling matrix (np.nonzero is row-major, so already
+    # grouped by row). Each flip then touches only a spin's neighbours — the Phase-14b O(degree) win.
+    Jm = np.ascontiguousarray(model.J, dtype=np.float64)
+    rows, cols = np.nonzero(Jm)
+    col_idx = cols.astype(np.int32)
+    weight = Jm[rows, cols].astype(np.float32)
+    row_ptr = np.zeros(n + 1, dtype=np.int32)
+    row_ptr[1:] = np.cumsum(np.bincount(rows, minlength=n))
+    nnz = int(col_idx.size)
 
     with tempfile.TemporaryDirectory() as d:
         prob = os.path.join(d, "problem.bin")
         res = os.path.join(d, "result.bin")
         with open(prob, "wb") as f:
-            # matches struct Params in ising_pt.cu: <4i Q 2f>
-            f.write(struct.pack("<iiiiQff", n, n_replicas, n_rounds, sweeps_per_round,
-                                seed & 0xFFFFFFFFFFFFFFFF, float(T_min), float(T_max)))
-            f.write(J.tobytes(order="C"))
+            # matches the packed header read in ising_pt.cu: <Q 5i 2f> then CSR + h
+            f.write(struct.pack("<Qiiiiiff", seed & 0xFFFFFFFFFFFFFFFF, n, n_replicas, n_rounds,
+                                sweeps_per_round, nnz, float(T_min), float(T_max)))
+            f.write(row_ptr.tobytes())
+            f.write(col_idx.tobytes())
+            f.write(weight.tobytes())
             f.write(h.tobytes())
 
         proc = subprocess.run([_BIN, prob, res], capture_output=True, text=True)

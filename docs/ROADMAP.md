@@ -165,13 +165,15 @@ proving anything — each one makes a piece of the process *observable*.
 - **Validated (CPU, 5/5; full suite 63/63):** finds the **exact** ground energy on MaxCut, a ±J spin
   glass, and a ferromagnet; replica exchange beats a lone cold walker; healthy ladder.
 - **GPU built + benchmarked (RTX 5060 Ti, sm_120):** acceptance test **passes** (GPU reproduces the
-  exact −22 / −33 energies); scales to n=2048. Measured ~0.05 Gflips/s — **low, and the benchmark
-  names why:** a flip does an O(n) update over *dense* J (real work ~10¹¹ field-updates/s), and the
-  single-spin-flip layout is latency-bound (32 replicas = 32 blocks, per-flip block syncs).
-- **Next (Phase 14b — where the GPU earns its keep):** **sparse-J (CSR)** so a flip is O(degree) not
-  O(n) — the biggest win; then a **parallel-update scheme** (checkerboard/graph-colouring, or
-  population annealing) to hide the serial-flip latency. Plus: route `factor()` / large MaxCut through
-  the engine; multi-GPU.
+  exact −22 / −33 energies); scales to n=2048.
+- **Phase 14b done — sparse-J (CSR) + occupancy:** each flip is now O(degree) not O(n) (throughput
+  flat in n, ~30 % faster), and R=32→128 (a finer PT ladder that also fills the SMs) adds ~4×.
+  **~0.05 → ~0.23 Gflips/s, ~4–5× over the first build**, same exact energies. Measured occupancy
+  curve confirmed 32 blocks left the GPU ~4× idle.
+- **Next (Phase 14c — the real GPU-Ising leap):** the engine is now **latency-bound by the serial
+  single-spin-flip** (one flip/block/step, three block syncs each). **Parallel spin updates** —
+  checkerboard / graph-colouring so a whole independent set flips at once — is where flips/s goes to
+  billions. Plus: route `factor()` / large MaxCut through the engine; multi-GPU.
 - **Honest scope:** strong minima, not certified optima (the exact engine stays the oracle on small n).
 
 ---

@@ -57,8 +57,10 @@ print(res.best_E, res.throughput, "flips/s")
 
 ## Honest scope
 
-- v1 targets **dense J** and modest replica counts (16–64). Very large n is bounded by the O(n²) J
-  in global memory and the O(n) field update per flip; sparse-J and multi-GPU are future work.
+- J is stored **sparse (CSR)**, so a flip is O(degree) and large sparse n is cheap; use ~128
+  replicas to fill the GPU (measured: 32 left the SMs ~4× idle). The throughput ceiling is now the
+  serial single-spin-flip (latency-bound) — parallel spin updates (checkerboard/colouring) and
+  multi-GPU are future work (Phase 14c).
 - Parallel tempering finds **strong minima**, not certified optima — DRIFT is a microscope for
   computation at scale, not a solver competing for SOTA. The certified answer is the exact engine's,
   on the small n where the two are cross-checked.
