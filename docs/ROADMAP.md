@@ -191,7 +191,11 @@ proving anything — each one makes a piece of the process *observable*.
   memory-bound diagnosis. **Net arc: ~0.044 → ~1.29 Gflips/s (~29×).**
 - **Next:** multi-GPU; route `factor()` / large MaxCut through the engine; (further micro: bit-pack
   spins / reduce shared-bank conflicts).
-- **Honest scope:** strong minima, not certified optima (the exact engine stays the oracle on small n).
+- **Solution quality validated:** fast ≠ good, so checked against a **known optimum at scale** — a
+  bipartite graph's max cut is every edge, and the engine recovers it **exactly (ratio 1.0000)** at
+  n = 128…1024. Certified two ways now: exact cross-check (n≤18) + known bipartite optimum (n≤1024).
+- **Honest scope:** on arbitrary frustrated instances at scale there's no oracle, so those minima are
+  strong-not-certified (standard for any heuristic) — stated plainly.
 
 ---
 

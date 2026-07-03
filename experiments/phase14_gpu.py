@@ -22,6 +22,19 @@ from drift.solvers.parallel_tempering import parallel_tempering
 from drift import gpu
 
 
+def _random_bipartite(n: int, p: float, seed: int) -> np.ndarray:
+    """A random bipartite graph on two equal halves — edges only cross the split. Its maximum cut is
+    every edge (the planted 2-colouring cuts them all), so it is a *known optimum* at any size."""
+    rng = np.random.default_rng(seed)
+    w = np.zeros((n, n))
+    half = n // 2
+    for i in range(half):
+        for j in range(half, n):
+            if rng.random() < p:
+                w[i, j] = w[j, i] = 1.0
+    return w
+
+
 def _small_instances():
     return {
         "maxcut G(16, .5)": maxcut_ising(random_graph(16, p=0.5, seed=3)),
@@ -71,6 +84,19 @@ def main(outdir: str = "figures") -> None:
             random_graph(n, p=min(0.1, 20.0 / n), seed=0), g.best_s)
         print(f"    n={n:5d}  E={g.best_E:12.1f}  cut={cut:8.1f}  "
               f"{(g.throughput or 0)/1e9:6.2f} Gflips/s  {g.seconds or 0:.3f}s")
+
+    # (3) solution quality vs a KNOWN optimum ----------------------------------
+    # Fast is not the same as good. A bipartite graph's maximum cut is *all* its edges (the planted
+    # 2-colouring cuts every edge), so it is a known optimum at any n — and the engine must find it.
+    print("\n(3) solution quality vs known optimum (bipartite: max cut = every edge):")
+    for n in (128, 256, 512, 1024):
+        w = _random_bipartite(n, p=min(0.08, 20.0 / n), seed=1)
+        edges = int(np.count_nonzero(np.triu(w)))
+        g = gpu.parallel_tempering_gpu(maxcut_ising(w), n_replicas=256, T_min=0.05, T_max=6.0,
+                                       n_rounds=500, sweeps_per_round=5, seed=0)
+        cut = int(round(cut_value(w, g.best_s)))
+        print(f"    n={n:5d}  edges={edges:6d}  GPU cut={cut:6d}  ratio={cut / edges:.4f}  "
+              f"{'OPTIMAL' if cut == edges else 'suboptimal'}")
 
     # ── figure ────────────────────────────────────────────────────────────────
     try:
