@@ -126,6 +126,25 @@ but it named the *real* next lever: **coalescing / caching those neighbour reads
 locality, or stage the replica's spins in shared memory). Distrust the pretty number; measure, and
 let the measurement point at the truth.
 
+### Phase 14e — shared-memory staging (the lever that *did* move it)
+
+The fix the measurement pointed at: a replica's spins are read many times per sweep (once per
+neighbour edge), so at the start of each round each warp **stages its replica's spins into shared
+memory as int8 (±1)**, runs all the sweeps against shared memory, and writes back to global once at
+the end. The hot scattered read `sr[colIdx[t]]` (global, uncoalesced) becomes a shared-memory access;
+`WARPS_PER_BLOCK · n` bytes of dynamic shared per block, with a `MaxDynamicSharedMemorySize` opt-in
+past 48 KB (so it still reaches n = 8192 = 64 KB on Blackwell).
+
+**Measured, stable (5-run median), R = 256:**
+
+| n | 128 | 256 | 512 | 1024 | 2048 | 4096 | 8192 |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Gflips/s | 0.94 | 0.90 | 1.01 | 1.19 | **1.29** | 1.30 | 1.36 |
+
+**~0.94 → ~1.29 Gflips/s at n=2048 (~1.37×), peak ~1.36 at n=8192** — exactly where the memory-bound
+diagnosis said the gain was, correctness intact (exact −22 / −33, same minima). The wrong lever
+(energy recompute) and the right one (shared staging) came from the *same* honest measurement.
+
 ### The whole arc, measured
 
 | build | flips/s @ n=2048 | wall @ n=2048 |
@@ -134,14 +153,16 @@ let the measurement point at the truth.
 | Phase 14b — sparse-J (CSR) | 0.06 G | — |
 | Phase 14b — + R=128 occupancy | 0.22 G | 1.95 s |
 | Phase 14c — checkerboard (block/replica) | 0.93 G | 0.45 s |
-| **Phase 14d — warp/replica, R=256** | **~0.94 G** (stable) | 0.89 s |
+| Phase 14d — warp/replica, R=256 | ~0.94 G (stable) | 0.89 s |
+| **Phase 14e — shared-memory staging** | **~1.29 G** | 0.65 s |
 
-**~0.044 → ~0.94 Gflips/s (~21×) over four measured steps — each one named the next bottleneck, and
+**~0.044 → ~1.29 Gflips/s (~29×) over five measured steps — each one named the next bottleneck, and
 none claimed a speed it hadn't shown** (including correcting a boost-clock outlier down to the stable
 rate). The microscope, pointed at itself: dense-O(n) → sparse-J → checkerboard parallel updates →
-warp-level replicas, and the exact −22 / −33 held at every step. The next real lever is **coalescing
-the scattered CSR neighbour reads** (the kernel is memory-bound there); then multi-GPU. The
-serial-flip wall that made the first GPU build no faster than a CPU is long gone.
+warp-level replicas → spins staged in shared memory, and the exact −22 / −33 held at every step,
+scaling to n = 8192. The serial-flip wall *and* the memory wall that made the first GPU build no
+faster than a CPU are both gone; the next levers are multi-GPU and routing `factor()` / large MaxCut
+through the engine.
 
 **Honest scope.** Parallel tempering finds **strong minima, not certified optima** — DRIFT is a
 microscope for computation at scale, not a SOTA solver; the certified answer stays the exact

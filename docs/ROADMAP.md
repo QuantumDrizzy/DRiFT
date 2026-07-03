@@ -184,9 +184,13 @@ proving anything — each one makes a piece of the process *observable*.
 - **Also done (neutral):** energy tracked **incrementally** (Σ dE telescopes to the exact change),
   removing the per-round O(nnz) recompute — verified exact (no drift), but throughput unchanged: the
   kernel is **memory-bound on the scattered CSR neighbour reads**, not the energy.
-- **Next (the real lever):** **coalesce / cache the neighbour reads** (`neigh_sum` gathers colIdx /
-  weight / spins uncoalesced) — stage the replica's spins in shared memory or reorder for locality.
-  Then multi-GPU; route `factor()` / large MaxCut through the engine.
+- **Phase 14e done — shared-memory staging:** each warp stages its replica's spins into shared memory
+  (int8 ±1) once per round, so the hot scattered read `sr[colIdx[t]]` becomes a shared access
+  (dynamic shared, `MaxDynamicSharedMemorySize` opt-in past 48 KB → still reaches n=8192). **~0.94 →
+  ~1.29 Gflips/s @ n=2048 (~1.37×), peak ~1.36 @ n=8192**, exact −22/−33 preserved. Vindicated the
+  memory-bound diagnosis. **Net arc: ~0.044 → ~1.29 Gflips/s (~29×).**
+- **Next:** multi-GPU; route `factor()` / large MaxCut through the engine; (further micro: bit-pack
+  spins / reduce shared-bank conflicts).
 - **Honest scope:** strong minima, not certified optima (the exact engine stays the oracle on small n).
 
 ---

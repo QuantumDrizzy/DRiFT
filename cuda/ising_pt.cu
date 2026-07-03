@@ -90,24 +90,38 @@ __global__ void sweep_kernel(const int* rowPtr, const int* colIdx, const float* 
     int r = blockIdx.x * WARPS_PER_BLOCK + (threadIdx.x / WARP);
     if (r >= R) return;
     int lane = threadIdx.x & (WARP - 1);
+    int warpInBlock = threadIdx.x / WARP;
     int gid = r * WARP + lane;
     float invT = beta[r];
     curandState st = states[gid];
     float* sr = &s[(size_t)r * n];
+
+    // Stage this replica's spins in shared memory (int8, ±1) — the spins are read many times per
+    // sweep (once per neighbour edge), so caching them turns the hot scattered read sr[colIdx[t]]
+    // (global, uncoalesced) into a shared-memory access. Global is touched only at the round's
+    // load/store boundaries.
+    extern __shared__ signed char sh[];
+    signed char* ss = &sh[(size_t)warpInBlock * n];
+    for (int i = lane; i < n; i += WARP) ss[i] = (signed char)sr[i];
+    __syncwarp();
 
     double dsum = 0.0;   // energy change accumulated from accepted flips (dE already computed)
     for (int sw = 0; sw < sweeps; ++sw) {
         for (int c = 0; c < k; ++c) {
             for (int idx = colorPtr[c] + lane; idx < colorPtr[c + 1]; idx += WARP) {
                 int i = colorSpins[idx];
-                double local = (double)h[i] + neigh_sum(i, rowPtr, colIdx, weight, sr);
-                double dE = 2.0 * (double)sr[i] * local;
-                if (dE <= 0.0 || curand_uniform(&st) < expf((float)(-dE * invT))) { sr[i] = -sr[i]; dsum += dE; }
+                double local = (double)h[i];
+                for (int t = rowPtr[i]; t < rowPtr[i + 1]; ++t)
+                    local += (double)weight[t] * (double)ss[colIdx[t]];
+                double si = (double)ss[i];
+                double dE = 2.0 * si * local;
+                if (dE <= 0.0 || curand_uniform(&st) < expf((float)(-dE * invT))) { ss[i] = (signed char)(-ss[i]); dsum += dE; }
             }
             __syncwarp();   // finish this colour before the next lane reads it
         }
     }
     states[gid] = st;
+    for (int i = lane; i < n; i += WARP) sr[i] = (float)ss[i];   // persist spins back to global
 
     // Energy tracked incrementally: Σ (accepted dE) telescopes to the exact energy change, because
     // flips within a colour are independent — so no O(nnz) recompute per round is needed.
@@ -120,7 +134,7 @@ __global__ void sweep_kernel(const int* rowPtr, const int* colIdx, const float* 
         if (improve) bestE[r] = e;
     }
     improve = __shfl_sync(FULL, improve, 0);
-    if (improve) for (int i = lane; i < n; i += WARP) bestS[(size_t)r * n + i] = sr[i];
+    if (improve) for (int i = lane; i < n; i += WARP) bestS[(size_t)r * n + i] = (float)ss[i];
 }
 
 __global__ void swap_kernel(double* E, float* beta, curandState* states, int R, int parity) {
@@ -191,9 +205,14 @@ int main(int argc, char** argv) {
     init_kernel<<<blocks, BDIM>>>(dRowPtr, dColIdx, dWeight, dh, ds, dE, dbestE, dbestS, dstates, n, R, seed);
     CUDA_CHECK(cudaDeviceSynchronize());
 
+    // dynamic shared memory: WARPS_PER_BLOCK replicas' spins, one int8 each (staged per sweep)
+    size_t shbytes = (size_t)WARPS_PER_BLOCK * n * sizeof(signed char);
+    if (shbytes > 48 * 1024)
+        CUDA_CHECK(cudaFuncSetAttribute(sweep_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, (int)shbytes));
+
     auto t0 = std::chrono::high_resolution_clock::now();
     for (int rnd = 0; rnd < n_rounds; ++rnd) {
-        sweep_kernel<<<blocks, BDIM>>>(dRowPtr, dColIdx, dWeight, dh, dColorPtr, dColorSpins, k,
+        sweep_kernel<<<blocks, BDIM, shbytes>>>(dRowPtr, dColIdx, dWeight, dh, dColorPtr, dColorSpins, k,
                                        ds, dE, dbestE, dbestS, dbeta, dstates, n, R, sweeps_per_round);
         swap_kernel<<<1, (R + 1) / 2>>>(dE, dbeta, dstates, R, rnd & 1);
     }
