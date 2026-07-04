@@ -189,8 +189,12 @@ proving anything — each one makes a piece of the process *observable*.
   (dynamic shared, `MaxDynamicSharedMemorySize` opt-in past 48 KB → still reaches n=8192). **~0.94 →
   ~1.29 Gflips/s @ n=2048 (~1.37×), peak ~1.36 @ n=8192**, exact −22/−33 preserved. Vindicated the
   memory-bound diagnosis. **Net arc: ~0.044 → ~1.29 Gflips/s (~29×).**
-- **Next:** multi-GPU; route `factor()` / large MaxCut through the engine; (further micro: bit-pack
-  spins / reduce shared-bank conflicts).
+- **Unified solver — `drift.solve`:** one `solve(model)` picks the best method by size/hardware —
+  **exact (certified)** for n ≤ exact_max, the **GPU-PT engine** for large n, **CPU-PT** as fallback —
+  and reports which ran and whether it is **certified** (a heuristic minimum is never passed off as
+  the proven optimum). `tests/test_solve.py` 4/4. So every face gets exact-when-it-can, scale-when-it-
+  must, from one call.
+- **Next:** multi-GPU; bit-pack spins / reduce shared-bank conflicts; wire `factor()` to `solve`.
 - **Solution quality validated:** fast ≠ good, so checked against a **known optimum at scale** — a
   bipartite graph's max cut is every edge, and the engine recovers it **exactly (ratio 1.0000)** at
   n = 128…1024. Certified two ways now: exact cross-check (n≤18) + known bipartite optimum (n≤1024).

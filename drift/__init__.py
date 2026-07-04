@@ -17,6 +17,7 @@ from .solvers.exact import exact_ground_state, all_configs
 from .solvers.annealing import simulated_annealing
 from .metrics import magnetization, energy_per_spin, landauer_energy_j
 from .mps import ground_state as tensor_ground_state, MpsResult
+from .solve import solve, Solution
 
 __all__ = [
     "IsingModel",
@@ -25,6 +26,8 @@ __all__ = [
     "simulated_annealing",
     "tensor_ground_state",
     "MpsResult",
+    "solve",
+    "Solution",
     "magnetization",
     "energy_per_spin",
     "landauer_energy_j",
