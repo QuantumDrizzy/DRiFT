@@ -184,3 +184,24 @@ known bipartite optimum up to n = 1024. On *arbitrary* frustrated instances at s
 oracle, so those minima are **strong, not certified** — the standard situation for any heuristic
 solver, stated plainly. DRIFT stays a microscope for computation at scale (cost reported, cross-
 checked), now with a GPU engine that is fast, correct, and — where an optimum is knowable — optimal.
+
+### The engine serves the thesis — self-replication grown at scale
+
+The GPU engine is not a detour from the four faces; it is their new lens. Routed through
+`drift.solve`, the Phase-6 **self-replication (crystallisation)** face is grown far past the exact
+wall: `crystal_2d` gives translation-invariant frustrated couplings whose ground state is the
+period-4 ↑↑↓↓ stripe crystal (energy density exactly −2), and the solver finds it — certified-exact
+at 4×4, then on the GPU to **64×64 = 4096 spins**, **defect-free at every scale** (`experiments/
+crystal_gpu.py`, `figures/crystal_gpu.png`):
+
+| L×L | 4 | 8 | 16 | 32 | 48 | 64 |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| spins | 16 | 64 | 256 | 1024 | 2304 | 4096 |
+| E/n | −2.000 | −2.000 | −2.000 | −2.000 | −2.000 | −2.000 |
+| period | 4 | 4 | 4 | 4 | 4 | 4 |
+| defect-free | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+Parallel tempering finds the **true global crystal**, not a domain-riddled local minimum — a motif
+replicating from purely local rules at a scale (4096 spins) no exact method can reach, Phase 6's
+12×12 anneal now 64×64 and exact in energy. One engine, four faces — and the GPU is the microscope
+that lets them run at scale.
