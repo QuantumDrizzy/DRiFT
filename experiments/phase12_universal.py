@@ -28,7 +28,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from drift.circuits import Circuit, adder_truth_table, full_adder  # noqa: E402
 
-BG, FG, A1, A2 = "#0f1117", "#e2e8f0", "#5ac4b8", "#aa96f0"
+# Light theme: published figures are read on white. Accents are dark
+# enough to stay legible there and in greyscale print.
+BG, FG, A1, A2 = "#ffffff", "#1a1d21", "#0b6ea8", "#6a3d9a"
 
 
 def _ripple_vars(k: int) -> int:

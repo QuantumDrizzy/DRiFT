@@ -101,7 +101,7 @@ def cosmic_roofline_systems():
     """Honest order-of-magnitude landmarks, log J/op. Sources: textbook physics
     (Landauer kT ln 2; Margolus-Levitin), public-domain device characterisations,
     and standard estimates for biology. Numbers are landmarks, not precision claims."""
-    AMBER = "#ffb446"; CYAN = "#00e6c8"; MAGENTA = "#ff46a0"; LIME = "#9dff5a"
+    AMBER = "#d95f02"; CYAN = "#0b6ea8"; MAGENTA = "#a3327d"; LIME = "#2e7d32"
     return [
         ("Margolus-Levitin @ 1 GHz",      1.65e-25, LIME),
         ("Margolus-Levitin @ 1 THz",      1.65e-22, LIME),

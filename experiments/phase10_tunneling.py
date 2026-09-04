@@ -31,7 +31,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from drift.anneal import quantum_anneal, success_probability, transverse_driver  # noqa: E402
 from drift.tunneling import hamming_cost_energies, metropolis_sa  # noqa: E402
 
-BG, FG, A1, A2 = "#0f1117", "#e2e8f0", "#5ac4b8", "#aa96f0"
+# Light theme: published figures are read on white. Accents are dark
+# enough to stay legible there and in greyscale print.
+BG, FG, A1, A2 = "#ffffff", "#1a1d21", "#0b6ea8", "#6a3d9a"
 
 
 def main() -> None:

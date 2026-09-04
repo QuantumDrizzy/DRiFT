@@ -22,7 +22,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from drift.reservoir import IsingReservoir, memory_capacity  # noqa: E402
 
-BG, FG, A1, A2 = "#0f1117", "#e2e8f0", "#5ac4b8", "#aa96f0"
+# Light theme: published figures are read on white. Accents are dark
+# enough to stay legible there and in greyscale print.
+BG, FG, A1, A2 = "#ffffff", "#1a1d21", "#0b6ea8", "#6a3d9a"
 
 
 def main() -> None:
@@ -48,7 +50,7 @@ def main() -> None:
         a.set_facecolor(BG)
         a.tick_params(colors=FG)
         for sp in a.spines.values():
-            sp.set_color("#2a2f3a")
+            sp.set_color("#d8dce0")
         a.title.set_color(FG)
         a.xaxis.label.set_color(FG)
         a.yaxis.label.set_color(FG)
@@ -63,7 +65,7 @@ def main() -> None:
     ax[1].set_xlabel("spectral radius ρ")
     ax[1].set_ylabel("total memory capacity")
     ax[1].set_title("Memory capacity vs ρ")
-    ax[1].legend(facecolor=BG, edgecolor="#2a2f3a", labelcolor=FG)
+    ax[1].legend(facecolor=BG, edgecolor="#d8dce0", labelcolor=FG)
 
     fig.tight_layout()
     fig.savefig("figures/phase8_reservoir.png", dpi=140, facecolor=BG)

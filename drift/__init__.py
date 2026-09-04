@@ -12,6 +12,18 @@ Public surface (Phase 1):
     viz.*                    relaxation / spin figures
 """
 
+import sys as _sys
+
+# Eight of the experiment scripts print physics notation (arrows, rho, chi) to
+# stdout. On a Windows console the default cp1252 codec raises
+# UnicodeEncodeError on those, which killed the run before the figure was
+# saved. Reconfiguring here fixes every entry point that imports drift.
+for _stream in (_sys.stdout, _sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass  # not a reconfigurable text stream (redirected, or already utf-8)
+
 from .ising import IsingModel
 from .solvers.exact import exact_ground_state, all_configs
 from .solvers.annealing import simulated_annealing

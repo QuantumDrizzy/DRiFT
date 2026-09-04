@@ -26,7 +26,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from drift.reservoir import IsingReservoir, generalization_rank, kernel_rank  # noqa: E402
 
-BG, FG, A1, A2, A3 = "#0f1117", "#e2e8f0", "#5ac4b8", "#aa96f0", "#f0a05a"
+# Light theme: published figures are read on white. Accents are dark
+# enough to stay legible there and in greyscale print.
+BG, FG, A1, A2, A3 = "#ffffff", "#1a1d21", "#0b6ea8", "#6a3d9a", "#d95f02"
 
 
 def main() -> None:
@@ -47,7 +49,7 @@ def main() -> None:
     ax.set_facecolor(BG)
     ax.tick_params(colors=FG)
     for sp in ax.spines.values():
-        sp.set_color("#2a2f3a")
+        sp.set_color("#d8dce0")
     ax.title.set_color(FG)
     ax.xaxis.label.set_color(FG)
     ax.yaxis.label.set_color(FG)
@@ -59,7 +61,7 @@ def main() -> None:
     ax.set_xlabel("spectral radius ρ")
     ax.set_ylabel(f"effective rank (M = {m} streams)")
     ax.set_title("Reservoir linear-separation power vs ρ")
-    ax.legend(facecolor=BG, edgecolor="#2a2f3a", labelcolor=FG, fontsize=8)
+    ax.legend(facecolor=BG, edgecolor="#d8dce0", labelcolor=FG, fontsize=8)
 
     fig.tight_layout()
     os.makedirs("figures", exist_ok=True)

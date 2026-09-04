@@ -17,9 +17,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 # ── palette ───────────────────────────────────────────────────────────────────
-BG, PANEL = "#0a0c12", "#0e121c"
-CYAN, MAGENTA, AMBER, LIME = "#00e6c8", "#ff46a0", "#ffb446", "#9dff5a"
-TEXT, MUTED, GRID = "#c8d6e0", "#7a8796", "#1b2434"
+# Light theme: these figures are published in the README and in PDFs, both
+# read on white. The accents are dark enough to stay legible there and to
+# survive greyscale printing. Names kept for continuity with call sites.
+BG, PANEL = "#ffffff", "#f6f7f9"
+CYAN, MAGENTA, AMBER, LIME = "#0b6ea8", "#a3327d", "#d95f02", "#2e7d32"
+TEXT, MUTED, GRID = "#1a1d21", "#5b6672", "#d8dce0"
 FOOTER = "DRIFT · a microscope for physical computation"
 
 
@@ -29,7 +32,7 @@ def _style() -> None:
         "axes.edgecolor": GRID, "axes.labelcolor": TEXT, "text.color": TEXT,
         "xtick.color": MUTED, "ytick.color": MUTED, "grid.color": GRID,
         "axes.grid": True, "grid.alpha": 0.5, "grid.linewidth": 0.7,
-        "axes.titlecolor": CYAN, "axes.titlesize": 13, "axes.titleweight": "bold",
+        "axes.titlecolor": TEXT, "axes.titlesize": 13, "axes.titleweight": "bold",
         "font.size": 11, "font.family": "DejaVu Sans Mono", "figure.dpi": 140,
         "axes.spines.top": False, "axes.spines.right": False,
     })
