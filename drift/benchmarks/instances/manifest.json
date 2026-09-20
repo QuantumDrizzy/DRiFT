@@ -1,0 +1,586 @@
+{
+  "version": "v1",
+  "question": "How do wall-clock time and solution quality (and χ where an MPS/tensor path applies) scale with system size n for fixed instance families, when solving via drift.solve (exact→GPU-PT→CPU-PT)?",
+  "mps_n_max_sweep": 16,
+  "mps_applies_to": [
+    "tfim-chain"
+  ],
+  "notes": "IDs are stable inside v1. Generators are seeded. known_energy is analytic, exact-enumerated (n≤20), or Lanczos (TFIM n≤14). fingerprint is sha256(J||h)[:16]. Heuristic solves are never certified.",
+  "instances": [
+    {
+      "id": "v1.maxcut-er.n008.s001",
+      "family": "maxcut-er",
+      "n": 8,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": -9.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "7314c99688effad4"
+    },
+    {
+      "id": "v1.pmj-glass.n008.s007",
+      "family": "pmj-glass",
+      "n": 8,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": -14.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "a9fe308d5ced8863"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n008.s002",
+      "family": "bipartite-maxcut",
+      "n": 8,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -9.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "3c4fbfe2773b60dd"
+    },
+    {
+      "id": "v1.ferro-chain.n008.s000",
+      "family": "ferro-chain",
+      "n": 8,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -7.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "4e4dba07f0e9ef0a"
+    },
+    {
+      "id": "v1.maxcut-er.n010.s001",
+      "family": "maxcut-er",
+      "n": 10,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": -9.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "735a7f73ebef2b90"
+    },
+    {
+      "id": "v1.pmj-glass.n010.s007",
+      "family": "pmj-glass",
+      "n": 10,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": -19.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "e9c8c14e749e68d8"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n010.s002",
+      "family": "bipartite-maxcut",
+      "n": 10,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -13.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "13ab18c3d99b1bbb"
+    },
+    {
+      "id": "v1.ferro-chain.n010.s000",
+      "family": "ferro-chain",
+      "n": 10,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -9.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "69ffe8cce34d3c1a"
+    },
+    {
+      "id": "v1.maxcut-er.n012.s001",
+      "family": "maxcut-er",
+      "n": 12,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": -15.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "aa7fa7be9f612a09"
+    },
+    {
+      "id": "v1.pmj-glass.n012.s007",
+      "family": "pmj-glass",
+      "n": 12,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": -32.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "aa4f30b2ef074623"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n012.s002",
+      "family": "bipartite-maxcut",
+      "n": 12,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -18.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "a8a4118dad3d10e8"
+    },
+    {
+      "id": "v1.ferro-chain.n012.s000",
+      "family": "ferro-chain",
+      "n": 12,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -11.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "9defdabb0dd4e1f0"
+    },
+    {
+      "id": "v1.maxcut-er.n014.s001",
+      "family": "maxcut-er",
+      "n": 14,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": -18.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "352cbf60b3d2984c"
+    },
+    {
+      "id": "v1.pmj-glass.n014.s007",
+      "family": "pmj-glass",
+      "n": 14,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": -33.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "27969b01c15ffce9"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n014.s002",
+      "family": "bipartite-maxcut",
+      "n": 14,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -23.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "559a440d08569faf"
+    },
+    {
+      "id": "v1.ferro-chain.n014.s000",
+      "family": "ferro-chain",
+      "n": 14,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -13.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "b410cba98ca4c795"
+    },
+    {
+      "id": "v1.maxcut-er.n016.s001",
+      "family": "maxcut-er",
+      "n": 16,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": -22.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "150dc909c5eacfc5"
+    },
+    {
+      "id": "v1.pmj-glass.n016.s007",
+      "family": "pmj-glass",
+      "n": 16,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": -42.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "75173f7f4f193a4a"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n016.s002",
+      "family": "bipartite-maxcut",
+      "n": 16,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -31.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "cddc092dc81f07c2"
+    },
+    {
+      "id": "v1.ferro-chain.n016.s000",
+      "family": "ferro-chain",
+      "n": 16,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -15.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "bd98102cd9318cad"
+    },
+    {
+      "id": "v1.maxcut-er.n018.s001",
+      "family": "maxcut-er",
+      "n": 18,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": -30.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "d660936742417648"
+    },
+    {
+      "id": "v1.pmj-glass.n018.s007",
+      "family": "pmj-glass",
+      "n": 18,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": -49.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "9da92390f7ea4193"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n018.s002",
+      "family": "bipartite-maxcut",
+      "n": 18,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -37.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "8e223b36df51409d"
+    },
+    {
+      "id": "v1.ferro-chain.n018.s000",
+      "family": "ferro-chain",
+      "n": 18,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -17.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "732ff436f906e163"
+    },
+    {
+      "id": "v1.maxcut-er.n020.s001",
+      "family": "maxcut-er",
+      "n": 20,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": -33.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "447128d078aa655f"
+    },
+    {
+      "id": "v1.pmj-glass.n020.s007",
+      "family": "pmj-glass",
+      "n": 20,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": -66.0,
+      "known_energy_source": "exact-enumeration",
+      "fingerprint": "d6c17f3564e1ac6a"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n020.s002",
+      "family": "bipartite-maxcut",
+      "n": 20,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -51.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "621e331fcf9ea1d9"
+    },
+    {
+      "id": "v1.ferro-chain.n020.s000",
+      "family": "ferro-chain",
+      "n": 20,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -19.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "323c4bbf2f3ac6f3"
+    },
+    {
+      "id": "v1.maxcut-er.n024.s001",
+      "family": "maxcut-er",
+      "n": 24,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": null,
+      "known_energy_source": null,
+      "fingerprint": "322e8c393aa78f32"
+    },
+    {
+      "id": "v1.pmj-glass.n024.s007",
+      "family": "pmj-glass",
+      "n": 24,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": null,
+      "known_energy_source": null,
+      "fingerprint": "8e1e341ca4ef8001"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n024.s002",
+      "family": "bipartite-maxcut",
+      "n": 24,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -70.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "fe52ad24b5b0eea5"
+    },
+    {
+      "id": "v1.ferro-chain.n024.s000",
+      "family": "ferro-chain",
+      "n": 24,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -23.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "b7423d9e4d54854d"
+    },
+    {
+      "id": "v1.maxcut-er.n032.s001",
+      "family": "maxcut-er",
+      "n": 32,
+      "seed": 1,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
+      "known_energy": null,
+      "known_energy_source": null,
+      "fingerprint": "c0a3888b714cb68e"
+    },
+    {
+      "id": "v1.pmj-glass.n032.s007",
+      "family": "pmj-glass",
+      "n": 32,
+      "seed": 7,
+      "params": {
+        "p": 1.0,
+        "field": 0.0
+      },
+      "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
+      "known_energy": null,
+      "known_energy_source": null,
+      "fingerprint": "efa83bfc40a311ed"
+    },
+    {
+      "id": "v1.bipartite-maxcut.n032.s002",
+      "family": "bipartite-maxcut",
+      "n": 32,
+      "seed": 2,
+      "params": {
+        "p": 0.5
+      },
+      "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
+      "known_energy": -132.0,
+      "known_energy_source": "analytic-bipartite-all-edges-cut",
+      "fingerprint": "4fef419d56812c3f"
+    },
+    {
+      "id": "v1.ferro-chain.n032.s000",
+      "family": "ferro-chain",
+      "n": 32,
+      "seed": 0,
+      "params": {
+        "j": 1.0
+      },
+      "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
+      "known_energy": -31.0,
+      "known_energy_source": "analytic-open-ferro-chain",
+      "fingerprint": "378170266808e3a3"
+    },
+    {
+      "id": "v1.crystal.n016.s000",
+      "family": "crystal",
+      "n": 16,
+      "seed": 0,
+      "params": {
+        "rows": 4,
+        "cols": 4
+      },
+      "notes": "Phase-6 stripe crystal 4×4; analytic E = −2n, period 4.",
+      "known_energy": -32.0,
+      "known_energy_source": "analytic-period4-crystal-E/n=-2",
+      "fingerprint": "b46274fd48e821b7"
+    },
+    {
+      "id": "v1.crystal.n032.s000",
+      "family": "crystal",
+      "n": 32,
+      "seed": 0,
+      "params": {
+        "rows": 4,
+        "cols": 8
+      },
+      "notes": "Phase-6 stripe crystal 4×8; analytic E = −2n. Cheap self-rep size step.",
+      "known_energy": -64.0,
+      "known_energy_source": "analytic-period4-crystal-E/n=-2",
+      "fingerprint": "0a12607c456aeffc"
+    },
+    {
+      "id": "v1.tfim-chain.n008.s000",
+      "family": "tfim-chain",
+      "n": 8,
+      "seed": 0,
+      "params": {
+        "j": 1.0,
+        "gamma": 1.0
+      },
+      "notes": "Open TFIM at Γ/J = 1 (critical-ish). Solved by MPS/TEBD, not drift.solve. Sweep χ cutoff n≤16 (local feasible ≤24; Phase 13 showed 48).",
+      "known_energy": -9.837951447459421,
+      "known_energy_source": "lanczos-exact",
+      "fingerprint": "4e4dba07f0e9ef0a"
+    },
+    {
+      "id": "v1.tfim-chain.n012.s000",
+      "family": "tfim-chain",
+      "n": 12,
+      "seed": 0,
+      "params": {
+        "j": 1.0,
+        "gamma": 1.0
+      },
+      "notes": "Open TFIM at Γ/J = 1 (critical-ish). Solved by MPS/TEBD, not drift.solve. Sweep χ cutoff n≤16 (local feasible ≤24; Phase 13 showed 48).",
+      "known_energy": -14.925971109908641,
+      "known_energy_source": "lanczos-exact",
+      "fingerprint": "9defdabb0dd4e1f0"
+    },
+    {
+      "id": "v1.tfim-chain.n016.s000",
+      "family": "tfim-chain",
+      "n": 16,
+      "seed": 0,
+      "params": {
+        "j": 1.0,
+        "gamma": 1.0
+      },
+      "notes": "Open TFIM at Γ/J = 1 (critical-ish). Solved by MPS/TEBD, not drift.solve. Sweep χ cutoff n≤16 (local feasible ≤24; Phase 13 showed 48).",
+      "known_energy": null,
+      "known_energy_source": null,
+      "fingerprint": "bd98102cd9318cad"
+    },
+    {
+      "id": "v1.tfim-chain.n020.s000",
+      "family": "tfim-chain",
+      "n": 20,
+      "seed": 0,
+      "params": {
+        "j": 1.0,
+        "gamma": 1.0
+      },
+      "notes": "Open TFIM at Γ/J = 1 (critical-ish). Solved by MPS/TEBD, not drift.solve. Sweep χ cutoff n≤16 (local feasible ≤24; Phase 13 showed 48).",
+      "known_energy": null,
+      "known_energy_source": null,
+      "fingerprint": "323c4bbf2f3ac6f3"
+    },
+    {
+      "id": "v1.tfim-chain.n024.s000",
+      "family": "tfim-chain",
+      "n": 24,
+      "seed": 0,
+      "params": {
+        "j": 1.0,
+        "gamma": 1.0
+      },
+      "notes": "Open TFIM at Γ/J = 1 (critical-ish). Solved by MPS/TEBD, not drift.solve. Sweep χ cutoff n≤16 (local feasible ≤24; Phase 13 showed 48).",
+      "known_energy": null,
+      "known_energy_source": null,
+      "fingerprint": "b7423d9e4d54854d"
+    }
+  ]
+}

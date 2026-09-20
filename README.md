@@ -62,9 +62,10 @@ DRIFT/
 │   ├── ADR-0001-architecture.md   architecture decision (engine + builders, Python-first)
 │   ├── ROADMAP.md                 phases, each with an "understanding goal" + deliverable
 │   ├── CONCEPTS.md                rigorous glossary, science vs. speculation tagged
-│   └── results/                   PHASE{N}-results.md + figures (filled as phases land)
+│   └── results/                   PHASE{N}-results.md + SCALE-sweep.md
 ├── drift/                         Python core (engine, solvers, builders, metrics, viz)
-├── experiments/                   one script per phase
+│   └── benchmarks/                versioned instance bank (manifest + seeded families)
+├── experiments/                   one script per phase + scale_sweep.py
 ├── tests/                         CPU pytest suite (GPU binary is local, not CI)
 └── figures/
 ```
@@ -175,7 +176,11 @@ same wall:
 
 ![A full adder computed as a ground state](figures/phase12_universal.png)
 
-Per-phase write-ups (P1–P14) live in [`docs/results/`](docs/results/).
+Per-phase write-ups (P1–P14) live in [`docs/results/`](docs/results/). The scale-path
+curves (n vs time, n vs energy error, method vs n, χ vs n) are in
+[`docs/results/SCALE-sweep.md`](docs/results/SCALE-sweep.md):
+
+![Scale path: drift.solve vs n](figures/scale/scale_sweep.png)
 
 ## Install
 
@@ -203,6 +208,16 @@ parallel tempering when the CUDA binary is present, otherwise CPU-PT, and are ma
 `factor()`, `Circuit.evaluate`, and `minimise_qubo` all go through this path. Pass
 `require_certified=True` when a proven ground state is required (truth tables, uniqueness
 claims); that restores the exact-engine wall instead of guessing.
+
+**Scale sweep** (wall time, energy error, method vs n on a versioned instance bank):
+
+```bash
+python -m experiments.scale_sweep          # CPU ladder, GPU-PT if the binary is present
+python -m experiments.scale_sweep --ci     # n≤10, skip MPS — what CI runs
+```
+
+See [`docs/results/SCALE-sweep.md`](docs/results/SCALE-sweep.md) and `figures/scale/scale_sweep.png`.
+The scientific question and the v1 catalog live in `drift/benchmarks/instances/manifest.json`.
 
 ## Stack
 

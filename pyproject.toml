@@ -23,8 +23,12 @@ dev = ["pytest>=7.0"]
 [tool.setuptools.packages.find]
 include = ["drift*"]
 
+[tool.setuptools.package-data]
+"drift.benchmarks" = ["instances/*.json", "instances/fixtures/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = [
     "gpu: requires the compiled CUDA engine binary (skipped if missing)",
 ]
