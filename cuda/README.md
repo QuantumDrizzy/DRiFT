@@ -67,5 +67,8 @@ print(res.best_E, res.throughput, "flips/s")
 - Parallel tempering finds **strong minima**, not certified optima — DRIFT is a microscope for
   computation at scale, not a solver competing for SOTA. The certified answer is the exact engine's,
   on the small n where the two are cross-checked.
-- **Status:** the CUDA source is written against the CPU oracle but is compiled and benchmarked on
-  your machine; treat the first `phase14_gpu` run (exact cross-check) as the acceptance test.
+- **Status:** compiled and benchmarked on RTX 5060 Ti (sm_120, CUDA 13). Acceptance test **passes**
+  (exact −22 / −33). Measured ~1.29 Gflips/s @ n=2048 (Phase 14e); numbers live in
+  [`docs/results/PHASE14-results.md`](../docs/results/PHASE14-results.md). The binary is a local
+  Windows/sm_120 artifact — not committed, not CI. Re-run `python -m experiments.phase14_gpu` on a
+  machine that has built `ising_pt.exe` to reproduce.

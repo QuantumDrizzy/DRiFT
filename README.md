@@ -56,6 +56,7 @@ See [`docs/CONCEPTS.md`](docs/CONCEPTS.md).
 
 ```
 DRIFT/
+├── pyproject.toml                 pip install -e ".[dev]"
 ├── README.md
 ├── docs/
 │   ├── ADR-0001-architecture.md   architecture decision (engine + builders, Python-first)
@@ -64,15 +65,17 @@ DRIFT/
 │   └── results/                   PHASE{N}-results.md + figures (filled as phases land)
 ├── drift/                         Python core (engine, solvers, builders, metrics, viz)
 ├── experiments/                   one script per phase
+├── tests/                         CPU pytest suite (GPU binary is local, not CI)
 └── figures/
 ```
 
 ## Status
 
-**Phases P0–P13 landed.** The engine, the four ground-state faces, the synthesis,
+**Phases P0–P14 landed.** The engine, the four ground-state faces, the synthesis,
 the *dynamical* face, the optimization face run *quantum*, the honest quantum-vs-classical
-comparison, arithmetic as a ground state, universal computation, and — at last — the
-tensor-network solver that reads a ground state the way the thesis always promised:
+comparison, arithmetic as a ground state, universal computation, the tensor-network solver
+that reads a ground state the way the thesis always promised, and the GPU parallel-tempering
+engine that scales the optimization face past the exact wall:
 
 - P0 — scaffolding · P1 — engine + observability · P2 — optimization (MaxCut) ·
   P3 — quantum ground state + χ thermometer · P4 — Hopfield memory · P5 — Wang-tile
@@ -117,17 +120,21 @@ tensor-network solver that reads a ground state the way the thesis always promis
   **reproduces Phase 3's χ peak independently** (Γ≈0.77, χ=6), and runs **past the exact wall**:
   n=48 (2⁴⁸≈2.8×10¹⁴ states) with E/n → −4/π. The "read with tensor networks" thesis, finally
   delivered (`tests/test_mps.py`, 7/7; `figures/phase13_tensor.png`).
-- **P14 — the GPU Ising engine** (`cuda/ising_pt.cu`, `drift/gpu.py`) — *CPU reference landed, GPU
-  benchmark pending on-device.* Scales the **optimization face** past the ~22-spin exact wall by
-  **parallel tempering** (replica-exchange Metropolis) on the GPU. The CPU reference
+- **P14 — the GPU Ising engine** (`cuda/ising_pt.cu`, `drift/gpu.py`) — *CPU reference + GPU engine
+  landed and measured (RTX 5060 Ti, sm_120).* Scales the **optimization face** past the ~22-spin
+  exact wall by **parallel tempering** (replica-exchange Metropolis). The CPU reference
   (`drift/solvers/parallel_tempering.py`) finds the **exact** ground energy on MaxCut, a ±J spin
-  glass, and a ferromagnet (`tests/test_parallel_tempering.py`, 5/5); the CUDA engine mirrors it
-  (one block per replica, `nvcc -arch=sm_120`) and is validated by reproducing those exact energies
-  on the first on-device run before any throughput is claimed (`docs/ADR-0004`).
+  glass, and a ferromagnet (`tests/test_parallel_tempering.py`, 5/5). The CUDA engine reproduces
+  those exact energies on-device (−22 / −33), then was measured through sparse-J, occupancy,
+  checkerboard, warp-per-replica, and shared-memory staging: **~0.044 → ~1.29 Gflips/s @ n=2048
+  (~29×)**, scaling to n=8192. Where an optimum is knowable at scale (bipartite MaxCut), the cut
+  ratio is **1.0000** through n=1024. On arbitrary frustrated instances at scale, minima are
+  **strong-not-certified** — stated plainly. The binary is a local Windows/sm_120 artifact and is
+  **not in CI** (`docs/ADR-0004`, `docs/results/PHASE14-results.md`).
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..13}-results.md`.
+[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..14}-results.md`.
 
 ## Results (the figures)
 
@@ -170,10 +177,28 @@ same wall:
 
 ![A full adder computed as a ground state](figures/phase12_universal.png)
 
-Per-phase write-ups (P1–P12) live in [`docs/results/`](docs/results/).
+Per-phase write-ups (P1–P14) live in [`docs/results/`](docs/results/).
+
+## Install
+
+```bash
+pip install -e ".[dev]"
+pytest tests/ -q
+```
+
+Python 3.10+ (CI runs 3.11). That editable install makes `import drift` work without
+`PYTHONPATH`; experiment scripts still run from the repo root as before
+(`python experiments/phase1_ferromagnet.py`). Tests are **CPU-only**. The CUDA engine
+(`cuda/ising_pt.cu`, compiled with `nvcc -arch=sm_120`) is a local Windows/Blackwell binary
+and is **not** built, committed, or run in CI — pytest skips any GPU test if the binary is
+missing.
+
+Runtime deps also live in `requirements.txt` (same pins as `pyproject.toml`) for scripts
+that still install from the file.
 
 ## Stack
 
 Python-first (NumPy/SciPy + matplotlib for the engine and visuals — fast to iterate and
-*see*), with a Rust port of the hot-path solver planned once systems grow past what exact
-methods handle. Same Python-spec → Rust-core pattern as Blaze.
+*see*). The hot-path **optimization** solver is the Phase-14 CUDA parallel-tempering engine
+(local Windows/sm_120 binary — not in CI). Higher-D / large-χ **tensor-network** GPU/Rust
+work is still later; DRIFT is a microscope, not a SOTA race.
