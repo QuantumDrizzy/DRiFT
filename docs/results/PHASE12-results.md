@@ -13,12 +13,12 @@ complete, so this is genuine universality.
   each a 2-local QUBO whose ground states are exactly the gate's rows.
 - `Circuit` — variables by name; `add(gate, *wires)` sums a gate's penalty over shared global
   indices; `add_xor` builds the non-2-local XOR by composition `(x∨y) ∧ ¬(x∧y)`; `evaluate`
-  clamps the inputs with a field, hands the QUBO to DRIFT's Ising engine
-  (`qubo_to_ising → exact_ground_state`), and reads the outputs. The reported energy is the
-  *unclamped* circuit penalty: **0 ⇔ every gate is satisfied**.
+  clamps the inputs with a field, hands the QUBO to `drift.solve`, and reads the outputs. The
+  reported energy is the *unclamped* circuit penalty: **0 ⇔ every gate is satisfied**. Small
+  netlists are `certified=True`; larger ones are heuristic.
 - `full_adder` wires (a, b, cin) → (sum, cout) from these gates (14 variables).
 
-**Validated** (`tests/test_circuits.py`, 5/5):
+**Validated** (`tests/test_circuits.py`):
 
 - The primitive gates round-trip: their synthesised QUBO ground states equal their truth tables.
 - **The full adder computes every input.** DRIFT's ground-state engine returns the correct
@@ -39,8 +39,9 @@ complete, so this is genuine universality.
 - **The gates are real constraints:** forcing a wrong output (clamp `sum=1` for `0+0+0`) leaves
   every assignment violating a gate — the penalty cannot reach 0. Matter will not compute a false
   result for free.
-- **Honest scaling:** a 1-bit adder is 14 variables (solvable exactly); a 2-bit ripple adder is
-  past 22 — the same wall as Phase 11, stated rather than hidden.
+- **Honest scaling:** a 1-bit adder is certified-exact; a 2-bit ripple adder is past exact
+  reach and evaluates through `solve` with `certified=False`. Pass `require_certified=True`
+  when a proven ground state is required.
 
 **Figure:** `figures/phase12_universal.png` — (a) the full-adder truth table the ground state
 computes; (b) circuit variables vs ripple-adder width against the exact engine's 22-variable

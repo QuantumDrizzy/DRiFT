@@ -161,8 +161,8 @@ none claimed a speed it hadn't shown** (including correcting a boost-clock outli
 rate). The microscope, pointed at itself: dense-O(n) → sparse-J → checkerboard parallel updates →
 warp-level replicas → spins staged in shared memory, and the exact −22 / −33 held at every step,
 scaling to n = 8192. The serial-flip wall *and* the memory wall that made the first GPU build no
-faster than a CPU are both gone; the next levers are multi-GPU and routing `factor()` / large MaxCut
-through the engine.
+faster than a CPU are both gone; the next lever is multi-GPU. Faces share `drift.solve`
+(exact → GPU-PT → CPU-PT, `certified` only when exact).
 
 ### Solution quality — fast *and* good (validated against a known optimum at scale)
 

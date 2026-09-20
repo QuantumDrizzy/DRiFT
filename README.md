@@ -102,17 +102,15 @@ engine that scales the optimization face past the exact wall:
   `figures/phase10_tunneling.png`).
 - **P11 — factoring as a ground state** (`drift/factoring.py`): the boldest "matter computes"
   demo — encode `p·q = N` as a QUBO whose **ground state reveals the factors** (the energy
-  minimum *is* the arithmetic). DRIFT's own Ising engine factors `15, 35, 143, … 221 = 13×17`,
-  energy exactly 0 at each. **Honestly bounded:** the construction *raises* past the exact
-  engine's reach — the variable count and shrinking gap are why factoring stays hard and RSA is
-  safe. A principle, measured, **not an attack** (`tests/test_factoring.py`, 5/5;
+  minimum *is* the arithmetic). Routed through `drift.solve`: small N is certified-exact;
+  larger N is GPU-PT then CPU-PT with `certified=False`. DRIFT factors `15, 35, 143, … 221 =
+  13×17` exactly (energy 0). A principle, measured, **not an attack** (`tests/test_factoring.py`;
   `figures/phase11_factoring.png`).
 - **P12 — universal computation** (`drift/circuits.py`): logic gates synthesised as QUBO
-  penalties and **composed by sharing wires**, so any Boolean circuit is a ground state. DRIFT's
-  engine computes a **1-bit full adder**'s entire truth table (all 8 inputs → correct sum/cout,
-  penalty 0); XOR built by composition; forcing a wrong output costs energy. AND/OR/NOT are
-  complete → genuine universality, bounded by the same honest wall (`tests/test_circuits.py`,
-  5/5; `figures/phase12_universal.png`).
+  penalties and **composed by sharing wires**, so any Boolean circuit is a ground state.
+  `Circuit.evaluate` goes through `drift.solve` (certified-exact on a 1-bit full adder; heuristic
+  past that). AND/OR/NOT are complete → genuine universality (`tests/test_circuits.py`;
+  `figures/phase12_universal.png`).
 - **P13 — the tensor-network ground state** (`drift/mps.py`): the microscope's lens becomes the
   engine. An **MPS solver** finds the ground state by imaginary-time TEBD, so the bond dimension
   χ that was Phase 3's *thermometer* is now the solver's own *compute budget* — the truncation
@@ -195,6 +193,16 @@ missing.
 
 Runtime deps also live in `requirements.txt` (same pins as `pyproject.toml`) for scripts
 that still install from the file.
+
+## Solver path
+
+Faces share **one** ground-state search: [`drift.solve`](drift/solve.py). Small instances
+use the exact engine and come back `certified=True`. Larger ones fall through to GPU
+parallel tempering when the CUDA binary is present, otherwise CPU-PT, and are marked
+`certified=False` — a strong heuristic minimum, never a pretend optimum.
+`factor()`, `Circuit.evaluate`, and `minimise_qubo` all go through this path. Pass
+`require_certified=True` when a proven ground state is required (truth tables, uniqueness
+claims); that restores the exact-engine wall instead of guessing.
 
 ## Stack
 

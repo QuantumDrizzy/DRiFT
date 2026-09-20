@@ -3,8 +3,10 @@ drift.factoring — Phase 11: integer factorization as an Ising ground state.
 ===========================================================================
 The boldest "matter computes" demonstration in the lab: encode the constraint **p · q = N**
 as a QUBO whose **ground state reveals the factors**. Nothing searches or divides — the energy
-minimum *is* the arithmetic. We build the QUBO, hand it to DRIFT's own Ising ground-state
-engine (`exact_ground_state`), and read the factors straight off the lowest-energy spins.
+minimum *is* the arithmetic. We build the QUBO, hand it to ``drift.solve`` (exact when n is
+small, GPU-PT then CPU-PT past that), and read the factors straight off the lowest-energy
+spins. The result's ``certified`` flag is True only for the exact engine — a heuristic
+minimum is never passed off as the proven optimum.
 
 How it is built (a textbook multiplication encoding):
 
@@ -24,10 +26,12 @@ DRIFT (Phase 2) pointed at arithmetic: matter computing a product by relaxing to
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 
 from .builders.qubo import qubo_to_ising
-from .solvers.exact import exact_ground_state
+from .solve import solve
 
 
 def _layout(p_bits: int, q_bits: int) -> tuple[dict, list]:
@@ -95,6 +99,11 @@ def factoring_qubo(N: int, p_bits: int, q_bits: int, penalty: float | None = Non
             "N": N, "const": K * K}
 
 
+def n_qubo_vars(p_bits: int, q_bits: int) -> int:
+    """QUBO variable count: free p-bits + free q-bits + one AND auxiliary per product."""
+    return (p_bits - 1) + (q_bits - 1) + (p_bits - 1) * (q_bits - 1)
+
+
 def decode(spec: dict, x: np.ndarray) -> tuple[int, int]:
     """Decode a 0/1 assignment ``x`` (one entry per QUBO variable) into the integers (p, q)."""
     idx, p_bits, q_bits = spec["idx"], spec["p_bits"], spec["q_bits"]
@@ -103,27 +112,36 @@ def decode(spec: dict, x: np.ndarray) -> tuple[int, int]:
     return p, q
 
 
-def factor(N: int, p_bits: int | None = None, q_bits: int | None = None) -> dict:
-    """Factor a semiprime ``N`` by finding the ground state of its factorization QUBO with
-    DRIFT's exact Ising engine. Returns the recovered (p, q), whether p·q == N, and the QUBO
-    ground-state energy (≈ 0 when every constraint is satisfied)."""
-    import math
+def factor(N: int, p_bits: int | None = None, q_bits: int | None = None, **solve_kw) -> dict:
+    """Factor a semiprime ``N`` via ``drift.solve`` on its factorization QUBO.
 
+    Small instances (n ≤ ``exact_max``, default 18) use the exact engine and come back
+    ``certified=True``. Larger ones fall through to GPU-PT then CPU-PT and return
+    ``certified=False`` — a strong heuristic minimum, not a pretend optimum. ``ok`` is the
+    independent arithmetic check ``p·q == N`` (a lucky heuristic can still factor; a miss
+    is ``ok=False`` with positive energy).
+
+    Pass ``require_certified=True`` when a proven ground state is required; that raises
+    past exact reach instead of returning an uncertified assignment. Extra keyword
+    arguments are forwarded to ``solve`` (``exact_max``, ``use_gpu``, ``n_rounds``, …).
+    """
     if p_bits is None:  # the smaller factor is ≤ √N
         p_bits = max(2, math.isqrt(N).bit_length())
     if q_bits is None:  # the larger factor is ≤ N/3 (smallest odd prime factor ≥ 3)
         q_bits = max(2, (N // 3).bit_length())
-    nvars = (p_bits - 1) + (q_bits - 1) + (p_bits - 1) * (q_bits - 1)
-    if nvars > 22:
-        raise ValueError(
-            f"N={N} needs {nvars} QUBO variables (> 22 for the exact engine). That blow-up "
-            "*is* the point — factoring scales exponentially. Pass tighter p_bits/q_bits, or "
-            "use a bigger solver."
-        )
     spec = factoring_qubo(N, p_bits, q_bits)
     model, offset = qubo_to_ising(spec["Q"])
-    s_min, e_min, _ = exact_ground_state(model)
-    x = ((s_min + 1) // 2).astype(int)  # spins ±1 → bits 0/1
+    sol = solve(model, **solve_kw)
+    x = ((sol.s + 1) // 2).astype(int)  # spins ±1 → bits 0/1
     p, q = decode(spec, x)
-    energy = float(e_min + offset + spec["const"])  # true (N−p·q)²+penalties; 0 iff valid
-    return {"N": N, "p": p, "q": q, "ok": p * q == N, "energy": energy}
+    energy = float(sol.energy + offset + spec["const"])  # true (N−p·q)²+penalties; 0 iff valid
+    return {
+        "N": N,
+        "p": p,
+        "q": q,
+        "ok": p * q == N,
+        "energy": energy,
+        "n": sol.n,
+        "method": sol.method,
+        "certified": sol.certified,
+    }

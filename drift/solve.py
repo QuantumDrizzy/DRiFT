@@ -44,6 +44,7 @@ def solve(
     n_rounds: int = 400,
     sweeps_per_round: int = 4,
     seed: int = 0,
+    require_certified: bool = False,
 ) -> Solution:
     """Ground state of `model`, by the best method available for its size.
 
@@ -53,11 +54,23 @@ def solve(
 
     The result says which method ran and whether it is certified — a fast heuristic minimum is never
     passed off as the proven optimum.
+
+    Pass ``require_certified=True`` when a proven ground state is required (truth tables,
+    uniqueness claims, "this *is* the optimum"). That restores the exact-engine wall: n above
+    ``exact_max`` raises instead of returning an uncertified heuristic.
     """
     n = model.n
     if n <= exact_max:
         s, e, _ = exact_ground_state(model, max_n=max(exact_max, n))
         return Solution(s=s, energy=e, method="exact", certified=True)
+
+    if require_certified:
+        raise ValueError(
+            f"certified ground state requested, but n={n} > exact_max={exact_max} "
+            f"(the exact engine reaches ~22 spins). Shrink the instance, raise exact_max, "
+            "or pass require_certified=False to accept a GPU/CPU parallel-tempering "
+            "minimum that is not certified."
+        )
 
     if use_gpu and gpu.gpu_available():
         r = gpu.parallel_tempering_gpu(
