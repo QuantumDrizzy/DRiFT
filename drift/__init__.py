@@ -4,12 +4,17 @@ DRIFT — a microscope for physical computation.
 One Ising/tensor engine, many loads (QUBO, Hopfield, tiles, crystals). The shared
 primitives live here; builders (Hamiltonian generators) and solvers plug into them.
 
-Public surface (Phase 1):
+Public surface:
     IsingModel               the core object: H = -1/2 sᵀJs - hᵀs
     exact_ground_state       brute-force ground state (small n)
     simulated_annealing      Metropolis relaxation = the physics computing
+    tensor_ground_state      MPS/TEBD ground state (Phase 13)
+    solve                    unified dispatcher: exact / GPU-PT / CPU-PT
     magnetization, landauer_energy_j   observables
     viz.*                    relaxation / spin figures
+
+`drift.gpu` is the Phase-14 CUDA glue; it is not re-exported here. Call it
+explicitly. CI is CPU-only — `gpu_available()` is False without the local binary.
 """
 
 import sys as _sys

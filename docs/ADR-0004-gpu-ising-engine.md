@@ -1,6 +1,6 @@
 # ADR-0004: The GPU Ising engine — parallel tempering past the exact wall
 
-**Status:** Accepted (CPU reference landed; CUDA kernel written, on-device benchmark pending)
+**Status:** Accepted (CPU reference + CUDA engine landed and measured on-device; CI remains CPU-only)
 **Date:** 2026-07-02
 **Deciders:** Antonio (QuantumDrizzy)
 
@@ -9,9 +9,9 @@
 Through Phase 13 DRIFT reads ground states two ways: the exact engine (brute force / full-matrix
 Lanczos, ~22 spins) and the Phase-13 MPS solver (1-D quantum chains, χ-bounded). The **optimization
 face** — MaxCut, factoring, universal circuits, crystals, Hopfield, anything that becomes an
-`IsingModel` — is still capped at the exact wall or left to the single-walker CPU
-`simulated_annealing`. The ROADMAP explicitly defers *"large-scale GPU solving to a Rust/CUDA port
-if and when a phase needs it."* A phase needs it now, and the hardware is here: RTX 5060 Ti
+`IsingModel` — was still capped at the exact wall or left to the single-walker CPU
+`simulated_annealing`. The ROADMAP had deferred *"large-scale GPU solving to a Rust/CUDA port
+if and when a phase needs it."* A phase needed it, and the hardware was here: RTX 5060 Ti
 (Blackwell, sm_120), CUDA 13.
 
 ## Decision
@@ -62,16 +62,22 @@ ground energy where both run). It also matches the machine and the builder.
 
 - **Easier:** every optimization-face problem can now be run at n ≫ 22; a genuine spin-flips/sec
   benchmark exists; the CPU reference is a better solver than plain SA even without a GPU.
-- **Harder / to revisit:** dense-J memory limits very large n (sparse-J is future work); the CUDA
-  path is verified on-device by Antonio, not in CI; fp32 J may need fp64 for pathological instances.
-- **Honest status:** the CUDA source is written against the tested CPU oracle but **not yet compiled
-  or benchmarked** — the acceptance test is the first `python -m experiments.phase14_gpu` run
-  reproducing the exact ground energy on the small instances.
+- **Harder / to revisit:** dense-J was replaced by sparse-J (CSR); remaining limits are multi-GPU
+  and wiring `factor()` / large MaxCut through `drift.solve`. The CUDA path is verified on-device
+  by Antonio, **not in CI** (Windows/sm_120 local binary — never committed). fp32 J may need fp64
+  for pathological instances.
+- **Honest status:** the CUDA engine is **compiled and benchmarked** on an RTX 5060 Ti (sm_120,
+  CUDA 13). Acceptance test **passes** (GPU reproduces exact −22 / −33). Measured arc through
+  sparse-J, occupancy, checkerboard, warp-per-replica, and shared-memory staging: **~0.044 →
+  ~1.29 Gflips/s @ n=2048 (~29×)**, scaling to n=8192. Bipartite MaxCut at n=128…1024 recovers
+  the known optimum (ratio 1.0000). On arbitrary frustrated instances at scale, minima are
+  **strong-not-certified**. Full numbers: [`docs/results/PHASE14-results.md`](results/PHASE14-results.md).
 
 ## Action Items
 
 1. [x] CPU reference `parallel_tempering` + tests vs exact (5/5).
 2. [x] CUDA engine `ising_pt.cu` + `build.bat` + `drift/gpu.py` glue + `experiments/phase14_gpu.py`.
-3. [ ] `build.bat` on the x64 Native Tools prompt; confirm exact cross-check passes on-device.
-4. [ ] Record real throughput (Gflips/s) vs n in `docs/results/PHASE14-results.md` + the figure.
-5. [ ] Follow-ups: sparse-J path; wire `factor()` / large MaxCut through the GPU engine.
+3. [x] `build.bat` on the x64 Native Tools prompt; confirm exact cross-check passes on-device.
+4. [x] Record real throughput (Gflips/s) vs n in `docs/results/PHASE14-results.md` + the figure.
+5. [x] Sparse-J (CSR) + occupancy + checkerboard + warp-per-replica + shared-memory staging (14b–14e).
+6. [ ] Follow-ups: multi-GPU; wire `factor()` / large MaxCut through `drift.solve`.

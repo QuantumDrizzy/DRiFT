@@ -8,8 +8,10 @@ dist/
 *.npy
 .pytest_cache/
 
-# CUDA build artifacts
+# CUDA build artifacts (local Windows/sm_120 binary — never commit)
 cuda/*.exe
 cuda/*.exp
 cuda/*.lib
 cuda/*.pdb
+cuda/*.obj
+cuda/ising_pt

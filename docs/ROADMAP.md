@@ -153,7 +153,8 @@ proving anything — each one makes a piece of the process *observable*.
   n grows. `tests/test_mps.py`, 7/7. **Figure:** `figures/phase13_tensor.png`.
 - **Honest scope:** the CPU 1-D **reference** solver — exact while χ ≤ chi_max, degrading
   *measurably* (χ pinned, entropy rising) at criticality where entanglement outgrows the budget.
-  Higher-D / large-χ / GPU is the still-deferred Rust/CUDA story; the thesis is no longer deferred.
+  Higher-D / large-χ **GPU MPS/TEBD** is still deferred; Phase 14's CUDA engine is Ising parallel
+  tempering, not a tensor-network GPU. The "read with tensor networks" thesis is no longer deferred.
 
 ### Phase 14 — The GPU Ising engine (parallel tempering) ✅  *(built + benchmarked; [results](results/PHASE14-results.md), [ADR-0004](ADR-0004-gpu-ising-engine.md))*
 - **Understood:** *the substrate, run at scale.* Scales the **optimization face** (MaxCut, factoring,
@@ -162,7 +163,7 @@ proving anything — each one makes a piece of the process *observable*.
 - **Built:** `drift/solvers/parallel_tempering.py` (CPU reference + oracle), `cuda/ising_pt.cu`
   (one block per replica, local-field maintenance, coalesced updates via J-symmetry, temperature-swap
   exchange, cuRAND; `nvcc -arch=sm_120`), `drift/gpu.py` (drop-in glue), `experiments/phase14_gpu.py`.
-- **Validated (CPU, 5/5; full suite 63/63):** finds the **exact** ground energy on MaxCut, a ±J spin
+- **Validated (CPU PT, 5/5):** finds the **exact** ground energy on MaxCut, a ±J spin
   glass, and a ferromagnet; replica exchange beats a lone cold walker; healthy ladder.
 - **GPU built + benchmarked (RTX 5060 Ti, sm_120):** acceptance test **passes** (GPU reproduces the
   exact −22 / −33 energies); scales to n=2048.
@@ -206,4 +207,6 @@ proving anything — each one makes a piece of the process *observable*.
 ## Out of scope (on purpose)
 - Beating quantum-annealing or DMRG SOTA — DRIFT is a microscope, not a competitor.
 - Claims about consciousness, real nanotech, or imminent grey goo — see CONCEPTS honesty tags.
-- Large-scale GPU solving — deferred to a Rust/CUDA port if and when a phase needs it.
+- Multi-GPU, GPU MPS/TEBD (higher-D / large-χ), and wiring `factor()` / circuits through
+  `drift.solve` — still later work. Phase 14 landed **single-GPU Ising parallel tempering**
+  (local Windows/sm_120 binary, not CI); that is not the same as those deferred items.
