@@ -200,12 +200,24 @@ proving anything — each one makes a piece of the process *observable*.
   through the dispatcher. Small n stays certified-exact; past exact reach they return `method`
   + `certified=False` rather than raising or pretending optimality. `require_certified=True`
   restores the old fail-loud wall.
-- **Next:** multi-GPU; bit-pack spins / reduce shared-bank conflicts.
 - **Solution quality validated:** fast ≠ good, so checked against a **known optimum at scale** — a
   bipartite graph's max cut is every edge, and the engine recovers it **exactly (ratio 1.0000)** at
   n = 128…1024. Certified two ways now: exact cross-check (n≤18) + known bipartite optimum (n≤1024).
 - **Honest scope:** on arbitrary frustrated instances at scale there's no oracle, so those minima are
   strong-not-certified (standard for any heuristic) — stated plainly.
+
+### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md))*
+- **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
+  path applies) scale with system size n for fixed instance families, when solving via `drift.solve`
+  (exact → GPU-PT → CPU-PT)?*
+- **Built:** `drift/benchmarks/` — v1 catalog (`instances/manifest.json`) with stable IDs and seeded
+  generators for MaxCut Erdős–Rényi, ±J spin glass, bipartite MaxCut, ferro chain, crystal size
+  ladder, and a TFIM chain for χ; `experiments/scale_sweep.py` records n, method, certified, energy,
+  wall time, and χ (MPS only, n≤16 on CPU / n≤24 local). GPU binary optional (falls through to CPU-PT).
+- **Validated:** bank loads and fingerprints match generators; tiny n≤10 sweep finishes; **certified
+  is True only for exact** (`tests/test_scale_sweep.py`).
+- **Figure:** `figures/scale/scale_sweep.png` — n vs time, n vs energy error, method vs n, χ vs n.
+- **Next:** still later — multi-GPU; bit-pack spins / reduce shared-bank conflicts; GPU MPS/TEBD.
 
 ---
 

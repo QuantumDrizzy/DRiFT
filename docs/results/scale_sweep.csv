@@ -1,0 +1,44 @@
+id,family,n,seed,method,certified,energy,known_energy,energy_error,wall_s,chi,chi_kept,notes
+v1.maxcut-er.n008.s001,maxcut-er,8,1,exact,True,-9.0,-9.0,0.0,0.00026732200001333695,,,certified exact enumeration
+v1.pmj-glass.n008.s007,pmj-glass,8,7,exact,True,-14.0,-14.0,0.0,0.00010154899996450695,,,certified exact enumeration
+v1.bipartite-maxcut.n008.s002,bipartite-maxcut,8,2,exact,True,-9.0,-9.0,0.0,8.5808999983783e-05,,,certified exact enumeration
+v1.ferro-chain.n008.s000,ferro-chain,8,0,exact,True,-7.0,-7.0,0.0,7.343699996908981e-05,,,certified exact enumeration
+v1.maxcut-er.n010.s001,maxcut-er,10,1,exact,True,-9.0,-9.0,0.0,0.00018683400003283168,,,certified exact enumeration
+v1.pmj-glass.n010.s007,pmj-glass,10,7,exact,True,-19.0,-19.0,0.0,0.00011447599990788149,,,certified exact enumeration
+v1.bipartite-maxcut.n010.s002,bipartite-maxcut,10,2,exact,True,-13.0,-13.0,0.0,0.00010568200002580852,,,certified exact enumeration
+v1.ferro-chain.n010.s000,ferro-chain,10,0,exact,True,-9.0,-9.0,0.0,9.710699998777272e-05,,,certified exact enumeration
+v1.maxcut-er.n012.s001,maxcut-er,12,1,exact,True,-15.0,-15.0,0.0,0.0008328699999538003,,,certified exact enumeration
+v1.pmj-glass.n012.s007,pmj-glass,12,7,exact,True,-32.0,-32.0,0.0,0.0005498439999200855,,,certified exact enumeration
+v1.bipartite-maxcut.n012.s002,bipartite-maxcut,12,2,exact,True,-18.0,-18.0,0.0,0.0005290230000127849,,,certified exact enumeration
+v1.ferro-chain.n012.s000,ferro-chain,12,0,exact,True,-11.0,-11.0,0.0,0.0005194010000195703,,,certified exact enumeration
+v1.maxcut-er.n014.s001,maxcut-er,14,1,exact,True,-18.0,-18.0,0.0,0.0032592500000419022,,,certified exact enumeration
+v1.pmj-glass.n014.s007,pmj-glass,14,7,exact,True,-33.0,-33.0,0.0,0.002000019999968572,,,certified exact enumeration
+v1.bipartite-maxcut.n014.s002,bipartite-maxcut,14,2,exact,True,-23.0,-23.0,0.0,0.001911319999976513,,,certified exact enumeration
+v1.ferro-chain.n014.s000,ferro-chain,14,0,exact,True,-13.0,-13.0,0.0,0.0019639839999854303,,,certified exact enumeration
+v1.maxcut-er.n016.s001,maxcut-er,16,1,exact,True,-22.0,-22.0,0.0,0.01564463700003671,,,certified exact enumeration
+v1.pmj-glass.n016.s007,pmj-glass,16,7,exact,True,-42.0,-42.0,0.0,0.006154907999984971,,,certified exact enumeration
+v1.bipartite-maxcut.n016.s002,bipartite-maxcut,16,2,exact,True,-31.0,-31.0,0.0,0.005862695000018903,,,certified exact enumeration
+v1.ferro-chain.n016.s000,ferro-chain,16,0,exact,True,-15.0,-15.0,0.0,0.006162834999940969,,,certified exact enumeration
+v1.maxcut-er.n018.s001,maxcut-er,18,1,exact,True,-30.0,-30.0,0.0,0.05822641100007786,,,certified exact enumeration
+v1.pmj-glass.n018.s007,pmj-glass,18,7,exact,True,-49.0,-49.0,0.0,0.028056596000055833,,,certified exact enumeration
+v1.bipartite-maxcut.n018.s002,bipartite-maxcut,18,2,exact,True,-37.0,-37.0,0.0,0.02422395599990068,,,certified exact enumeration
+v1.ferro-chain.n018.s000,ferro-chain,18,0,exact,True,-17.0,-17.0,0.0,0.024044128000014098,,,certified exact enumeration
+v1.maxcut-er.n020.s001,maxcut-er,20,1,cpu-pt,False,-33.0,-33.0,0.0,2.463531869999997,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.pmj-glass.n020.s007,pmj-glass,20,7,cpu-pt,False,-66.0,-66.0,0.0,2.506773952000003,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.bipartite-maxcut.n020.s002,bipartite-maxcut,20,2,cpu-pt,False,-51.0,-51.0,0.0,2.4887092469999743,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.ferro-chain.n020.s000,ferro-chain,20,0,cpu-pt,False,-19.0,-19.0,0.0,2.4598883730000125,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.maxcut-er.n024.s001,maxcut-er,24,1,cpu-pt,False,-48.0,,,3.0671423710000454,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.pmj-glass.n024.s007,pmj-glass,24,7,cpu-pt,False,-68.0,,,3.0224434169999768,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.bipartite-maxcut.n024.s002,bipartite-maxcut,24,2,cpu-pt,False,-70.0,-70.0,0.0,2.9765105550000044,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.ferro-chain.n024.s000,ferro-chain,24,0,cpu-pt,False,-23.0,-23.0,0.0,2.9121810330000244,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.maxcut-er.n032.s001,maxcut-er,32,1,cpu-pt,False,-66.0,,,3.9110102180000013,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.pmj-glass.n032.s007,pmj-glass,32,7,cpu-pt,False,-122.0,,,3.9431020659999376,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.bipartite-maxcut.n032.s002,bipartite-maxcut,32,2,cpu-pt,False,-132.0,-132.0,0.0,4.249008018999916,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.ferro-chain.n032.s000,ferro-chain,32,0,cpu-pt,False,-31.0,-31.0,0.0,4.215873746999932,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.crystal.n016.s000,crystal,16,0,exact,True,-32.0,-32.0,0.0,0.006693440000049122,,,certified exact enumeration
+v1.crystal.n032.s000,crystal,32,0,cpu-pt,False,-64.0,-64.0,0.0,4.169505579000088,,,GPU binary absent; continuing with CPU-PT; heuristic minimum; not certified
+v1.tfim-chain.n008.s000,tfim-chain,8,0,mps,False,-9.837872305307622,-9.837951447459421,7.914215179916084e-05,0.01802724600008787,4,13,MPS/TEBD (variational; never certified)
+v1.tfim-chain.n012.s000,tfim-chain,12,0,mps,False,-14.925264725892774,-14.925971109908641,0.0007063840158672008,0.04433224299998528,4,16,MPS/TEBD (variational; never certified)
+v1.tfim-chain.n016.s000,tfim-chain,16,0,mps,False,-20.0145175378815,,,0.09790253400001347,5,16,MPS/TEBD (variational; never certified)
+v1.tfim-chain.n020.s000,tfim-chain,20,0,skipped,False,,,,0.0,,,MPS skipped: n=20 > mps_n_max=16
+v1.tfim-chain.n024.s000,tfim-chain,24,0,skipped,False,,,,0.0,,,MPS skipped: n=24 > mps_n_max=16
