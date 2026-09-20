@@ -15,6 +15,7 @@ import os
 import sys
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -22,6 +23,7 @@ from drift.builders.qubo import maxcut_ising, random_graph  # noqa: E402
 from drift.ising import IsingModel  # noqa: E402
 from drift.solve import solve  # noqa: E402
 from drift.solvers.exact import exact_ground_state  # noqa: E402
+from drift.solvers.parallel_tempering import PtResult  # noqa: E402
 
 
 def test_small_is_exact_and_certified():
@@ -67,9 +69,30 @@ def test_ferromagnet_ground_state():
     assert np.isclose(sol.energy, -(n - 1)), f"{sol.energy} != {-(n - 1)}"
 
 
+def test_require_certified_raises_past_exact_max():
+    """A proven ground state is a hard requirement — the dispatcher refuses to guess."""
+    model = maxcut_ising(random_graph(12, p=0.5, seed=3))
+    with pytest.raises(ValueError, match="certified"):
+        solve(model, exact_max=8, require_certified=True, use_gpu=False)
+
+
+def test_gpu_dispatch_is_not_certified(monkeypatch):
+    """The GPU branch is a heuristic: method gpu-pt, certified=False (binary mocked)."""
+    model = maxcut_ising(random_graph(12, p=0.5, seed=3))
+
+    def fake_pt(model, **kwargs):
+        s = np.ones(model.n)
+        return PtResult(
+            best_s=s, best_E=float(model.energy(s)),
+            temperatures=np.array([0.1]), swap_rate=0.0,
+        )
+
+    monkeypatch.setattr("drift.gpu.gpu_available", lambda: True)
+    monkeypatch.setattr("drift.gpu.parallel_tempering_gpu", fake_pt)
+    sol = solve(model, exact_max=8, use_gpu=True)
+    assert sol.method == "gpu-pt"
+    assert sol.certified is False
+
+
 if __name__ == "__main__":
-    for name, fn in sorted(globals().items()):
-        if name.startswith("test_") and callable(fn):
-            fn()
-            print(f"ok  {name}")
-    print("all solve tests passed")
+    raise SystemExit(pytest.main([__file__]))

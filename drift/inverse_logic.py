@@ -44,6 +44,7 @@ import numpy as np
 from scipy.optimize import linprog
 
 from .ising import IsingModel
+from .solve import Solution, solve
 
 
 class NotQuadratic(Exception):
@@ -118,11 +119,31 @@ def qubo_energy(Q: np.ndarray, offset: float, x) -> float:
 
 
 def qubo_ground_states(Q: np.ndarray, offset: float, n: int) -> frozenset:
-    """The realised truth table: all binary rows that minimise the synthesised penalty."""
+    """The realised truth table: all binary rows that minimise the synthesised penalty.
+
+    This enumerates 2ⁿ — it is the **certified** check that a synthesised QUBO's ground-state
+    *set* equals the target truth table. Use it only on small n. To find *one* low-energy
+    assignment of a larger QUBO, use ``minimise_qubo`` (routes through ``drift.solve``;
+    ``certified`` is True only when the exact engine ran).
+    """
     configs = list(itertools.product((0, 1), repeat=n))
     energies = [qubo_energy(Q, offset, c) for c in configs]
     emin = min(energies)
     return frozenset(c for c, e in zip(configs, energies) if abs(e - emin) < 1e-6)
+
+
+def minimise_qubo(Q: np.ndarray, offset: float = 0.0, **solve_kw) -> Solution:
+    """Find a low-energy assignment of the QUBO via ``drift.solve``.
+
+    Use this when *one* minimum is enough — evaluating a synthesised gate, reading a
+    circuit output. A heuristic minimum is acceptable there; the result's ``certified``
+    flag is True only for the exact engine. Pass ``require_certified=True`` when a proven
+    ground state is required.
+
+    For the *full* ground-state set (truth-table certification), keep
+    ``qubo_ground_states``, which enumerates 2ⁿ and is only for small n.
+    """
+    return solve(qubo_to_ising(Q, offset), **solve_kw)
 
 
 def qubo_to_ising(Q: np.ndarray, offset: float = 0.0) -> IsingModel:
@@ -184,7 +205,7 @@ def xor_via_composition() -> frozenset:
 
 def _main() -> None:
     from .logic import TRUTH
-    from .solvers import simulated_annealing, exact_ground_state
+    from .solvers import simulated_annealing
 
     print("=== DRIFT — inverse computronium: target truth table -> QUBO penalty ===\n")
 
@@ -209,13 +230,13 @@ def _main() -> None:
     print(f"    XOR via composition of synthesised gates == XOR truth table: "
           f"{xor_via_composition() == truth_from_fn(lambda x, y: x ^ y, 2)}")
 
-    print("\n  consume the anneal spine — let DRIFT's SA compute the synthesised AND:")
+    print("\n  consume the solver path — let DRIFT's solve / SA compute the synthesised AND:")
     Qa, offa = synthesize(TRUTH['AND'], 3)
+    sol = minimise_qubo(Qa, offa)
     model = qubo_to_ising(Qa, offa)
-    s_exact, _, _ = exact_ground_state(model)
     s_sa, _, _, _ = simulated_annealing(model, n_sweeps=400, seed=0)
-    print(f"    exact ground state  -> bits {spins_to_bits(s_exact)}  (valid AND row: "
-          f"{spins_to_bits(s_exact) in TRUTH['AND']})")
+    print(f"    solve ({sol.method}, certified={sol.certified}) -> bits {spins_to_bits(sol.s)}  "
+          f"(valid AND row: {spins_to_bits(sol.s) in TRUTH['AND']})")
     print(f"    annealed (SA, 400 sweeps) -> bits {spins_to_bits(s_sa)}  (valid AND row: "
           f"{spins_to_bits(s_sa) in TRUTH['AND']})")
 

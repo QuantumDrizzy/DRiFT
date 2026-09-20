@@ -11,9 +11,10 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from drift.logic import TRUTH, NAND_TRUTH  # noqa: E402
-from drift.solvers import exact_ground_state, simulated_annealing  # noqa: E402
+from drift.solvers import simulated_annealing  # noqa: E402
 from drift.inverse_logic import (  # noqa: E402
     NotQuadratic,
+    minimise_qubo,
     qubo_energy,
     qubo_ground_states,
     qubo_to_ising,
@@ -79,10 +80,25 @@ def test_consume_anneal_spine_recovers_valid_row():
     for name, n in (("AND", 3), ("OR", 3)):
         Q, off = synthesize(TRUTH[name], n)
         model = qubo_to_ising(Q, off)
-        s_exact, _, _ = exact_ground_state(model)
-        assert spins_to_bits(s_exact) in TRUTH[name]
+        sol = minimise_qubo(Q, off)
+        assert sol.certified is True and sol.method == "exact"
+        assert spins_to_bits(sol.s) in TRUTH[name]
         s_sa, _, _, _ = simulated_annealing(model, n_sweeps=400, seed=0)
         assert spins_to_bits(s_sa) in TRUTH[name]
+
+
+def test_minimise_qubo_switches_past_exact_max():
+    """A heuristic minimum of a synthesised gate is not labelled certified."""
+    Q, off = synthesize(TRUTH["AND"], 3)
+    sol = minimise_qubo(Q, off, exact_max=2, use_gpu=False, n_replicas=8, n_rounds=40, seed=0)
+    assert sol.method == "cpu-pt"
+    assert sol.certified is False
+
+
+def test_minimise_qubo_require_certified_raises():
+    Q, off = synthesize(TRUTH["AND"], 3)
+    with pytest.raises(ValueError, match="certified"):
+        minimise_qubo(Q, off, exact_max=2, require_certified=True)
 
 
 def test_empty_and_malformed_rejected():

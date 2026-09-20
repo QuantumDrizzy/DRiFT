@@ -118,10 +118,11 @@ proving anything — each one makes a piece of the process *observable*.
   the factorization. The optimization face (Phase 2) pointed at number theory.
 - **Built:** `drift/factoring.py` — `factoring_qubo` (odd-factor binary encoding, products
   linearised by AND-gadget auxiliaries, objective `(N−p·q)²`) and `factor` (QUBO → Ising →
-  exact ground state → decode). Energy is exactly 0 at a valid factorization.
+  `drift.solve` → decode). Energy is exactly 0 at a valid factorization.
 - **Validated:** DRIFT's engine factors `15, 35, 143, … 221 = 13×17` (energy 0); the QUBO's own
-  brute-force minimum agrees; and `factor(143)` with default widths *raises* (23 > 22 vars) —
-  the construction is honest about its wall. `tests/test_factoring.py`, 5/5.
+  brute-force minimum agrees. Past exact reach, `factor()` goes through `drift.solve` (GPU-PT
+  then CPU-PT) and returns `certified=False` rather than raising or pretending optimality.
+  `tests/test_factoring.py`.
 - **Honest scope:** a demonstration of the principle on small semiprimes, **not** a cryptographic
   attack — it scales exponentially, which is exactly why RSA is safe (`figures/phase11_factoring.png`).
 
@@ -130,11 +131,11 @@ proving anything — each one makes a piece of the process *observable*.
   composed by sharing wires; AND/OR/NOT are complete, so any Boolean circuit is a ground state.
 - **Built:** `drift/circuits.py` — primitive gates from `inverse_logic.synthesize`, a `Circuit`
   that sums gate penalties over named wires (`add`, `add_xor` by composition), and `evaluate`
-  that clamps inputs and reads the output from DRIFT's exact ground state. `full_adder` wires
+  that clamps inputs and reads the output from `drift.solve`. `full_adder` wires
   (a, b, cin) → (sum, cout).
-- **Validated:** the full adder computes all 8 inputs correctly (penalty 0); XOR by composition;
-  a forced-wrong output costs energy; a 2-bit ripple adder exceeds the engine (honest wall).
-  `tests/test_circuits.py`, 5/5. **Figure:** `figures/phase12_universal.png`.
+- **Validated:** the full adder computes all 8 inputs correctly (penalty 0, certified-exact);
+  XOR by composition; a forced-wrong output costs energy. Wider circuits use the same solver
+  path with `certified=False`. `tests/test_circuits.py`.
 - **Honest scope:** the principle is universal; the demonstration is a 1-bit adder because the
   state space is exponential in the variable count — the computronium thesis, measured, not oversold.
 
@@ -193,9 +194,13 @@ proving anything — each one makes a piece of the process *observable*.
 - **Unified solver — `drift.solve`:** one `solve(model)` picks the best method by size/hardware —
   **exact (certified)** for n ≤ exact_max, the **GPU-PT engine** for large n, **CPU-PT** as fallback —
   and reports which ran and whether it is **certified** (a heuristic minimum is never passed off as
-  the proven optimum). `tests/test_solve.py` 4/4. So every face gets exact-when-it-can, scale-when-it-
+  the proven optimum). `tests/test_solve.py`. So every face gets exact-when-it-can, scale-when-it-
   must, from one call.
-- **Next:** multi-GPU; bit-pack spins / reduce shared-bank conflicts; wire `factor()` to `solve`.
+- **Faces share `drift.solve`:** `factor()`, `Circuit.evaluate`, and `minimise_qubo` route
+  through the dispatcher. Small n stays certified-exact; past exact reach they return `method`
+  + `certified=False` rather than raising or pretending optimality. `require_certified=True`
+  restores the old fail-loud wall.
+- **Next:** multi-GPU; bit-pack spins / reduce shared-bank conflicts.
 - **Solution quality validated:** fast ≠ good, so checked against a **known optimum at scale** — a
   bipartite graph's max cut is every edge, and the engine recovers it **exactly (ratio 1.0000)** at
   n = 128…1024. Certified two ways now: exact cross-check (n≤18) + known bipartite optimum (n≤1024).
@@ -207,6 +212,6 @@ proving anything — each one makes a piece of the process *observable*.
 ## Out of scope (on purpose)
 - Beating quantum-annealing or DMRG SOTA — DRIFT is a microscope, not a competitor.
 - Claims about consciousness, real nanotech, or imminent grey goo — see CONCEPTS honesty tags.
-- Multi-GPU, GPU MPS/TEBD (higher-D / large-χ), and wiring `factor()` / circuits through
-  `drift.solve` — still later work. Phase 14 landed **single-GPU Ising parallel tempering**
+- Multi-GPU and GPU MPS/TEBD (higher-D / large-χ) — still later work. Phase 14 landed
+  **single-GPU Ising parallel tempering**
   (local Windows/sm_120 binary, not CI); that is not the same as those deferred items.

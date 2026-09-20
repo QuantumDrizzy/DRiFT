@@ -12,20 +12,22 @@ This is the Phase-2 optimization face pointed straight at number theory.
   bit `t_{ij}` pinned to the AND of its inputs by the standard penalty
   `pᵢ qⱼ − 2t(pᵢ+qⱼ) + 3t`. The objective `(N − p·q)²` is added on top. The result is a genuine
   QUBO whose ground state sits exactly at `p·q = N`.
-- `factor(N)` — builds the QUBO, converts it to an `IsingModel` (`qubo_to_ising`), finds the
-  ground state with DRIFT's exact engine (`exact_ground_state`), and decodes the spins into
-  `(p, q)`. The reported energy is the true `(N − p·q)² + penalties`, **exactly 0 at a valid
-  factorization** and positive otherwise.
+- `factor(N)` — builds the QUBO, converts it to an `IsingModel` (`qubo_to_ising`), finds a
+  minimum through `drift.solve` (exact when n is small, GPU-PT then CPU-PT past that), and
+  decodes the spins into `(p, q)`. The reported energy is the true `(N − p·q)² + penalties`,
+  **exactly 0 at a valid factorization** and positive otherwise. `certified` is True only for
+  the exact engine.
 
-**Validated** (`tests/test_factoring.py`, 5/5):
+**Validated** (`tests/test_factoring.py`):
 
 - **The ground state recovers the factors** for `15, 21, 35, 77, 143` (and the experiment goes
   to `221 = 13 × 17`) — non-trivial factors, `p · q = N`, **energy = 0** in every case.
 - The QUBO's own global minimum (brute force over `xᵀQx`) decodes to the same factorization,
   and DRIFT's Ising path agrees with it — the answer is in the QUBO, not an artefact of the
   solver.
-- **The construction is honest about scaling:** a too-large instance *raises* rather than
-  pretending — `factor(143)` with default widths needs 23 variables, past the exact engine's 22.
+- **Past exact reach the face does not pretend:** `factor(143)` with default widths needs 23
+  variables. It no longer raises; it returns `method` in `{gpu-pt, cpu-pt}` and
+  `certified=False`. Callers who need a proven ground state pass `require_certified=True`.
 
 **Figure:** `figures/phase11_factoring.png` — (a) the QUBO variable count grows only ~ (log N)²;
 (b) but the search space `2^(#vars)` explodes past the exact engine's 2²² ceiling. The wall is

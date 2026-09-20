@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from drift.builders.qubo import maxcut_ising, random_graph  # noqa: E402
 from drift.gpu import gpu_available, parallel_tempering_gpu  # noqa: E402
 from drift.ising import IsingModel  # noqa: E402
+from drift.solve import solve  # noqa: E402
 from drift.solvers.exact import exact_ground_state  # noqa: E402
 
 
@@ -51,3 +52,16 @@ def test_gpu_reproduces_exact_on_small_maxcut():
         model, n_replicas=16, T_min=0.05, T_max=4.0, n_rounds=200, sweeps_per_round=4, seed=1
     )
     assert res.best_E == pytest.approx(e_exact)
+
+
+@pytest.mark.gpu
+@pytest.mark.skipif(not gpu_available(), reason="CUDA engine binary not built")
+def test_solve_gpu_path_is_not_certified():
+    """Faces share this path: past exact_max, solve() is gpu-pt and not certified."""
+    model = maxcut_ising(random_graph(20, p=0.5, seed=2))
+    sol = solve(
+        model, exact_max=16, use_gpu=True,
+        n_replicas=16, n_rounds=80, sweeps_per_round=4, seed=1,
+    )
+    assert sol.method == "gpu-pt"
+    assert sol.certified is False

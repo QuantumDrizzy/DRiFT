@@ -62,8 +62,8 @@ ground energy where both run). It also matches the machine and the builder.
 
 - **Easier:** every optimization-face problem can now be run at n ≫ 22; a genuine spin-flips/sec
   benchmark exists; the CPU reference is a better solver than plain SA even without a GPU.
-- **Harder / to revisit:** dense-J was replaced by sparse-J (CSR); remaining limits are multi-GPU
-  and wiring `factor()` / large MaxCut through `drift.solve`. The CUDA path is verified on-device
+- **Harder / to revisit:** dense-J was replaced by sparse-J (CSR); remaining limits are multi-GPU.
+  The CUDA path is verified on-device
   by Antonio, **not in CI** (Windows/sm_120 local binary — never committed). fp32 J may need fp64
   for pathological instances.
 - **Honest status:** the CUDA engine is **compiled and benchmarked** on an RTX 5060 Ti (sm_120,
@@ -80,4 +80,6 @@ ground energy where both run). It also matches the machine and the builder.
 3. [x] `build.bat` on the x64 Native Tools prompt; confirm exact cross-check passes on-device.
 4. [x] Record real throughput (Gflips/s) vs n in `docs/results/PHASE14-results.md` + the figure.
 5. [x] Sparse-J (CSR) + occupancy + checkerboard + warp-per-replica + shared-memory staging (14b–14e).
-6. [ ] Follow-ups: multi-GPU; wire `factor()` / large MaxCut through `drift.solve`.
+6. [x] Wire `factor()` / circuits / inverse-logic minimisation through `drift.solve`
+   (exact → GPU-PT → CPU-PT, honest `certified` flag).
+7. [ ] Follow-ups: multi-GPU.

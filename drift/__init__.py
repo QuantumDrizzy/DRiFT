@@ -10,6 +10,7 @@ Public surface:
     simulated_annealing      Metropolis relaxation = the physics computing
     tensor_ground_state      MPS/TEBD ground state (Phase 13)
     solve                    unified dispatcher: exact / GPU-PT / CPU-PT
+                             (the path every face uses; certified only when exact)
     magnetization, landauer_energy_j   observables
     viz.*                    relaxation / spin figures
 

@@ -63,7 +63,8 @@ print(res.best_E, res.throughput, "flips/s")
   replica's spins in shared memory** (int8) so the hot neighbour reads hit shared, not global. Use
   **~256 replicas** (warp-per-replica's sweet spot — a replica is cheap, so many fill the GPU and make
   a finer PT ladder). **~1.29 Gflips/s @ n=2048**, scales to n=8192 (~1.36), exact ground energies
-  preserved. Multi-GPU and routing `factor()` / large MaxCut through the engine are future work.
+  preserved. Faces (`factor()`, `Circuit.evaluate`, MaxCut via `solve(maxcut_ising(...))`) share
+  `drift.solve`. Multi-GPU is future work.
 - Parallel tempering finds **strong minima**, not certified optima — DRIFT is a microscope for
   computation at scale, not a solver competing for SOTA. The certified answer is the exact engine's,
   on the small n where the two are cross-checked.
