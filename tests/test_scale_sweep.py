@@ -15,11 +15,14 @@ import json
 import numpy as np
 import pytest
 
+from drift import gpu
 from drift.benchmarks import (
     BANK_VERSION,
+    CLASSICAL_N_LADDER,
     FAMILIES,
     MPS_FAMILIES,
     build_instance,
+    extra_seeds_for,
     fingerprint,
     fixtures_dir,
     iter_instances,
@@ -32,8 +35,14 @@ from drift.benchmarks import (
 )
 from drift.benchmarks.bank import spec_from_row
 from drift.solvers.exact import exact_ground_state
-from experiments.scale_sweep import run_sweep, sweep_instance, write_results
 from drift.solve import solve
+from experiments.scale_sweep import (
+    SweepMeta,
+    run_sweep,
+    sweep_instance,
+    write_markdown_report,
+    write_results,
+)
 
 
 def test_bank_loads_with_stable_ids():
@@ -146,3 +155,81 @@ def test_fingerprint_mismatch_is_loud():
     bad = spec_from_row({**spec.to_json(), "fingerprint": "deadbeefdeadbeef"})
     with pytest.raises(ValueError, match="fingerprint mismatch"):
         build_instance(bad)
+
+
+PR4_CLASSICAL_N = (8, 10, 12, 14, 16, 18, 20, 24, 32)
+PR4_PRIMARY_IDS = (
+    "v1.maxcut-er.n008.s001",
+    "v1.pmj-glass.n008.s007",
+    "v1.bipartite-maxcut.n008.s002",
+    "v1.ferro-chain.n008.s000",
+    "v1.crystal.n016.s000",
+    "v1.crystal.n032.s000",
+    "v1.tfim-chain.n008.s000",
+)
+
+
+def test_bank_is_broader_than_pr4_ladder():
+    """v1 grew by adding IDs: denser n (through 40) and extra seeds. PR #4 IDs remain."""
+    specs = load_manifest()
+    ids = {s.id for s in specs}
+    for iid in PR4_PRIMARY_IDS:
+        assert iid in ids, iid
+    er_n = {s.n for s in specs if s.family == "maxcut-er"}
+    assert set(PR4_CLASSICAL_N).issubset(er_n)
+    assert 40 in er_n
+    assert CLASSICAL_N_LADDER[-1] == 40
+    assert len(CLASSICAL_N_LADDER) > len(PR4_CLASSICAL_N)
+    er8 = [s for s in specs if s.family == "maxcut-er" and s.n == 8]
+    assert len(er8) >= 2
+    ferro_seeds = {s.seed for s in specs if s.family == "ferro-chain"}
+    assert ferro_seeds == {0}
+
+
+def test_ferro_chain_is_not_duplicated_by_seed():
+    """The open ferro chain ignores seed; extra seeds would be the same Hamiltonian."""
+    assert extra_seeds_for("ferro-chain", 8) == ()
+    assert extra_seeds_for("maxcut-er", 8)
+    assert extra_seeds_for("maxcut-er", 32) == ()
+
+
+def test_ci_sized_sweep_stays_small_and_never_fakes_gpu_pt(tmp_path):
+    """--ci envelope: n≤10, extra seeds allowed, no gpu-pt without a binary."""
+    rows = run_sweep(n_max=10, skip_mps=True, use_gpu=True, n_rounds=20)
+    assert rows
+    assert all(r.n <= 10 for r in rows)
+    assert all(r.method in ("exact", "cpu-pt") for r in rows)
+    if not gpu.gpu_available():
+        assert all(r.method != "gpu-pt" for r in rows)
+    er = [r for r in rows if r.family == "maxcut-er"]
+    assert len(er) >= 2
+    n_zero = sum(
+        1 for r in rows
+        if r.energy_error is not None and r.method != "mps" and abs(float(r.energy_error)) < 1e-9
+    )
+    text = write_markdown_report(
+        rows,
+        tmp_path / "SCALE-sweep.md",
+        meta=SweepMeta(
+            profile="ci", n_min=1, n_max=10, exact_max=18, n_rounds=20,
+            use_gpu_flag=True, gpu_available=gpu.gpu_available(),
+            skip_mps=True, mps_n_max=16, command="pytest",
+        ),
+    ).read_text(encoding="utf-8")
+    assert f"Classical rows with dE = 0: **{n_zero}**" in text
+    assert n_zero == len(rows)  # n≤10 classical exact, every row has an oracle
+    if not gpu.gpu_available():
+        assert "gpu-pt rows in this file: none" in text
+        assert all(r.method != "gpu-pt" for r in rows)
+
+
+def test_heuristic_pt_past_exact_max_is_cpu_when_gpu_missing():
+    """Forcing a solve past exact_max without a binary records cpu-pt, never gpu-pt."""
+    spec = next(s for s in load_manifest() if s.family == "ferro-chain" and s.n == 20)
+    inst = build_instance(spec)
+    row = sweep_instance(inst, exact_max=18, use_gpu=True, n_replicas=8, n_rounds=20)
+    if gpu.gpu_available():
+        assert row.method in ("gpu-pt", "cpu-pt")
+    else:
+        assert row.method == "cpu-pt"
+    assert row.certified is False

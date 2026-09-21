@@ -2,9 +2,12 @@
 
 from .bank import (
     BANK_VERSION,
+    CLASSICAL_N_LADDER,
+    PRIMARY_SEEDS,
     BuiltInstance,
     InstanceSpec,
     build_instance,
+    extra_seeds_for,
     fingerprint,
     fixtures_dir,
     iter_instances,
@@ -12,6 +15,7 @@ from .bank import (
     load_manifest,
     make_id,
     manifest_path,
+    refresh_manifest,
     scientific_question,
 )
 from .families import (
@@ -27,6 +31,7 @@ from .families import (
 
 __all__ = [
     "BANK_VERSION",
+    "CLASSICAL_N_LADDER",
     "BuiltInstance",
     "FAMILIES",
     "FamilyName",
@@ -34,8 +39,10 @@ __all__ = [
     "MPS_FAMILIES",
     "MPS_N_MAX_LOCAL",
     "MPS_N_MAX_SWEEP",
+    "PRIMARY_SEEDS",
     "analytic_energy",
     "build_instance",
+    "extra_seeds_for",
     "ferro_chain",
     "fingerprint",
     "fixtures_dir",
@@ -44,6 +51,7 @@ __all__ = [
     "load_manifest",
     "make_id",
     "manifest_path",
+    "refresh_manifest",
     "scientific_question",
     "unknown_family",
 ]

@@ -206,18 +206,27 @@ proving anything — each one makes a piece of the process *observable*.
 - **Honest scope:** on arbitrary frustrated instances at scale there's no oracle, so those minima are
   strong-not-certified (standard for any heuristic) — stated plainly.
 
-### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md))*
+### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
   path applies) scale with system size n for fixed instance families, when solving via `drift.solve`
   (exact → GPU-PT → CPU-PT)?*
 - **Built:** `drift/benchmarks/` — v1 catalog (`instances/manifest.json`) with stable IDs and seeded
   generators for MaxCut Erdős–Rényi, ±J spin glass, bipartite MaxCut, ferro chain, crystal size
-  ladder, and a TFIM chain for χ; `experiments/scale_sweep.py` records n, method, certified, energy,
-  wall time, and χ (MPS only, n≤16 on CPU / n≤24 local). GPU binary optional (falls through to CPU-PT).
+  ladder, and a TFIM chain for χ; `experiments.scale_sweep` records n, method, certified, energy,
+  wall time, and χ (MPS only, n≤16 on CPU / n≤24 local). GPU binary optional (falls through to CPU-PT;
+  gpu-pt rows are never invented).
+- **Ladder (wider than the first scale-path PR):** even n = 8…40 (added 22, 28, 36, 40), extra seeds
+  on ER / ±J / bipartite at cheap n (and one extra seed at the n=20 dispatcher wall), denser crystal
+  (4×4 / 6×4 / 4×8 / 10×4) and TFIM (n=8,10,12,14,16) χ rungs. `ferro-chain` is seed-invariant and
+  is not duplicated. `--ci` stays n≤10 and does not clobber `docs/results/scale_sweep.*`.
 - **Validated:** bank loads and fingerprints match generators; tiny n≤10 sweep finishes; **certified
-  is True only for exact** (`tests/test_scale_sweep.py`).
+  is True only for exact**; published markdown reports `gpu-pt rows: none` on CPU
+  (`tests/test_scale_sweep.py`).
 - **Figure:** `figures/scale/scale_sweep.png` — n vs time, n vs energy error, method vs n, χ vs n.
-- **Next:** still later — multi-GPU; bit-pack spins / reduce shared-bank conflicts; GPU MPS/TEBD.
+- **Regenerate:** `python -m experiments.scale_sweep --profile local --write-report` (CPU) or
+  `--profile gpu` (records gpu-pt only if `cuda/ising_pt` actually ran).
+- **Next:** still later — multi-GPU; bit-pack spins / reduce shared-bank conflicts; GPU MPS/TEBD;
+  more bank families (Hopfield / tiles / circuits) on the same dispatcher.
 
 ---
 

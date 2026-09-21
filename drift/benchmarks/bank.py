@@ -39,6 +39,32 @@ MANIFEST_NAME = "manifest.json"
 EXACT_ENERGY_N_MAX = 20
 TFIM_LANCZOS_N_MAX = 14
 
+# Even-n ladder. PR #4 shipped 8…32 with a gap after 20; v1 grows by *adding* IDs
+# (22, 28, 36, 40) and extra seeds. Existing IDs keep their meaning — do not bump
+# BANK_VERSION unless a generator's (J, h) for an existing ID would change.
+CLASSICAL_N_LADDER = (8, 10, 12, 14, 16, 18, 20, 22, 24, 28, 32, 36, 40)
+
+PRIMARY_SEEDS: dict[str, int] = {
+    "maxcut-er": 1,
+    "pmj-glass": 7,
+    "bipartite-maxcut": 2,
+    "ferro-chain": 0,
+}
+
+# Extra seeds only on stochastic families. ferro-chain ignores seed (the chain is
+# determined by n and J), so duplicating it would be the same Hamiltonian twice.
+EXTRA_SEEDS: dict[str, tuple[int, ...]] = {
+    "maxcut-er": (2, 3),
+    "pmj-glass": (8, 9),
+    "bipartite-maxcut": (3, 4),
+}
+# Exact-cheap n (milliseconds). Extra seeds here keep CI and local exact rungs honest
+# about instance-to-instance scatter without a PT-time blowup.
+CHEAP_EXTRA_N = (8, 10, 12, 14, 16, 18)
+# One extra seed at the exact → PT dispatcher wall (n=20 still has an exact oracle
+# for MaxCut ER / ±J). Not repeated at n>20: those PT rungs are the expensive ones.
+PT_BOUNDARY_EXTRA_N = (20,)
+
 
 def _instances_dir() -> Path:
     return Path(__file__).resolve().parent / "instances"
@@ -91,48 +117,84 @@ def fingerprint(model: IsingModel) -> str:
     return hashlib.sha256(payload).hexdigest()[:16]
 
 
-def catalog_rows() -> list[dict[str, Any]]:
-    """The v1 size ladder. Edit here (and bump BANK_VERSION) if the ensemble changes."""
-    rows: list[dict[str, Any]] = []
-    n_ladder = (8, 10, 12, 14, 16, 18, 20, 24, 32)
-
-    for n in n_ladder:
-        rows.append({
-            "family": "maxcut-er", "n": n, "seed": 1,
+def _classical_row(family: str, n: int, seed: int, *, extra: bool = False) -> dict[str, Any]:
+    """One catalog dict for a classical (non-crystal, non-TFIM) family."""
+    tag = " Extra seed (same ensemble, independent draw)." if extra else ""
+    if family == "maxcut-er":
+        return {
+            "family": family, "n": n, "seed": seed,
             "params": {"p": 0.5},
-            "notes": "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20.",
-        })
-        rows.append({
-            "family": "pmj-glass", "n": n, "seed": 7,
+            "notes": (
+                "Erdős–Rényi MaxCut G(n, 1/2); known energy from exact enum at n≤20."
+                + tag
+            ),
+        }
+    if family == "pmj-glass":
+        return {
+            "family": family, "n": n, "seed": seed,
             "params": {"p": 1.0, "field": 0.0},
-            "notes": "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20.",
-        })
-        rows.append({
-            "family": "bipartite-maxcut", "n": n, "seed": 2,
+            "notes": (
+                "Complete ±J spin glass, h=0; frustrated; exact energy at n≤20."
+                + tag
+            ),
+        }
+    if family == "bipartite-maxcut":
+        return {
+            "family": family, "n": n, "seed": seed,
             "params": {"p": 0.5},
-            "notes": "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges.",
-        })
-        rows.append({
-            "family": "ferro-chain", "n": n, "seed": 0,
+            "notes": (
+                "Bipartite MaxCut; analytic optimum = every edge, E = −n_edges."
+                + tag
+            ),
+        }
+    if family == "ferro-chain":
+        return {
+            "family": family, "n": n, "seed": seed,
             "params": {"j": 1.0},
             "notes": "Open ferro chain; analytic E = −(n−1). 1-D geometry, not an MPS load.",
-        })
+        }
+    unknown_family(family)
 
-    # Period-4 crystal needs cols % 4 == 0. 4×4 is exact-reachable; 4×8 is a cheap PT step.
-    rows.append({
-        "family": "crystal", "n": 16, "seed": 0,
-        "params": {"rows": 4, "cols": 4},
-        "notes": "Phase-6 stripe crystal 4×4; analytic E = −2n, period 4.",
-    })
-    rows.append({
-        "family": "crystal", "n": 32, "seed": 0,
-        "params": {"rows": 4, "cols": 8},
-        "notes": "Phase-6 stripe crystal 4×8; analytic E = −2n. Cheap self-rep size step.",
-    })
+
+def extra_seeds_for(family: str, n: int) -> tuple[int, ...]:
+    """Extra seeds at this n, or empty. ferro-chain is seed-invariant — never duplicated."""
+    extras = EXTRA_SEEDS.get(family, ())
+    if not extras:
+        return ()
+    if n in CHEAP_EXTRA_N:
+        return extras
+    if n in PT_BOUNDARY_EXTRA_N:
+        return extras[:1]
+    return ()
+
+
+def catalog_rows() -> list[dict[str, Any]]:
+    """The v1 size ladder. Add IDs freely; bump BANK_VERSION only if a generator changes."""
+    rows: list[dict[str, Any]] = []
+
+    for n in CLASSICAL_N_LADDER:
+        for family, seed in PRIMARY_SEEDS.items():
+            rows.append(_classical_row(family, n, seed, extra=False))
+        for family, extras in EXTRA_SEEDS.items():
+            for seed in extra_seeds_for(family, n):
+                rows.append(_classical_row(family, n, seed, extra=True))
+
+    # Period-4 crystal needs cols % 4 == 0. rows is free. Denser size steps inside n≤40.
+    for n, rows_c, cols_c, note in (
+        (16, 4, 4, "Phase-6 stripe crystal 4×4; analytic E = −2n, period 4."),
+        (24, 6, 4, "Phase-6 stripe crystal 6×4; analytic E = −2n. Size step between 4×4 and 4×8."),
+        (32, 4, 8, "Phase-6 stripe crystal 4×8; analytic E = −2n. Cheap self-rep size step."),
+        (40, 10, 4, "Phase-6 stripe crystal 10×4; analytic E = −2n. Size step at n=40."),
+    ):
+        rows.append({
+            "family": "crystal", "n": n, "seed": 0,
+            "params": {"rows": rows_c, "cols": cols_c},
+            "notes": note,
+        })
 
     # TFIM chain: χ lives here. Sweep default cuts at MPS_N_MAX_SWEEP; n=20,24 are
     # in the bank for local runs (documented cutoff MPS_N_MAX_LOCAL).
-    for n in (8, 12, 16, 20, 24):
+    for n in (8, 10, 12, 14, 16, 20, 24):
         rows.append({
             "family": "tfim-chain", "n": n, "seed": 0,
             "params": {"j": 1.0, "gamma": 1.0},
@@ -259,12 +321,28 @@ def refresh_manifest(path: Path | None = None, *, write_fixtures: bool = True) -
     """Rebuild fingerprints, known energies, and (optionally) n≤8 fixtures. Writes JSON."""
     p = path or manifest_path()
     p.parent.mkdir(parents=True, exist_ok=True)
+    previous: dict[str, dict[str, Any]] = {}
+    if p.is_file():
+        prev_data = json.loads(p.read_text(encoding="utf-8"))
+        previous = {row["id"]: row for row in prev_data.get("instances", [])}
+
     instances: list[dict[str, Any]] = []
     for d in catalog_rows():
         spec = _spec_from_catalog_dict(d)
         built = build_instance(spec)
         spec.fingerprint = fingerprint(built.model)
         _fill_known_energy(spec, built)
+        old = previous.get(spec.id)
+        # Keep published known_energy bit-stable when Lanczos/exact only moved ULP noise.
+        if (
+            old
+            and old.get("fingerprint") == spec.fingerprint
+            and old.get("known_energy") is not None
+            and spec.known_energy is not None
+            and abs(float(old["known_energy"]) - float(spec.known_energy)) < 1e-12
+        ):
+            spec.known_energy = old["known_energy"]
+            spec.known_energy_source = old.get("known_energy_source") or spec.known_energy_source
         instances.append(spec.to_json())
         if write_fixtures and spec.n <= 8 and spec.family != "tfim-chain":
             _write_fixture(built)
@@ -316,3 +394,16 @@ def load_fixture(instance_id: str) -> BuiltInstance:
         h=np.asarray(data["h"], dtype=np.float64),
     )
     return BuiltInstance(spec=spec, model=model, extra={})
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Rebuild the checked-in manifest + n≤8 fixtures. Run after catalog_rows() changes."""
+    del argv
+    path = refresh_manifest()
+    n = len(json.loads(path.read_text(encoding="utf-8"))["instances"])
+    print(f"wrote {path}  ({n} instances, bank {BANK_VERSION})")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
