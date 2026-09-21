@@ -59,6 +59,7 @@ DRIFT/
 ├── pyproject.toml                 pip install -e ".[dev]"
 ├── README.md
 ├── docs/
+│   ├── TECH-REPORT.md             lab note / preprint skeleton (microscope)
 │   ├── ADR-0001-architecture.md   architecture decision (engine + builders, Python-first)
 │   ├── ROADMAP.md                 phases, each with an "understanding goal" + deliverable
 │   ├── CONCEPTS.md                rigorous glossary, science vs. speculation tagged
@@ -133,7 +134,8 @@ engine that scales the optimization face past the exact wall:
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) and `docs/results/PHASE{1..14}-results.md`.
+[`docs/TECH-REPORT.md`](docs/TECH-REPORT.md) (lab note),
+[`docs/ROADMAP.md`](docs/ROADMAP.md), and `docs/results/PHASE{1..14}-results.md`.
 
 ## Results (the figures)
 
@@ -178,7 +180,9 @@ same wall:
 
 Per-phase write-ups (P1–P14) live in [`docs/results/`](docs/results/). The scale-path
 curves (n vs time, n vs energy error, method vs n, χ vs n) are in
-[`docs/results/SCALE-sweep.md`](docs/results/SCALE-sweep.md):
+[`docs/results/SCALE-sweep.md`](docs/results/SCALE-sweep.md). A short lab note that
+ties the faces, the dispatcher, and those curves together without inventing numbers:
+[`docs/TECH-REPORT.md`](docs/TECH-REPORT.md).
 
 ![Scale path: drift.solve vs n](figures/scale/scale_sweep.png)
 
@@ -209,15 +213,21 @@ parallel tempering when the CUDA binary is present, otherwise CPU-PT, and are ma
 `require_certified=True` when a proven ground state is required (truth tables, uniqueness
 claims); that restores the exact-engine wall instead of guessing.
 
-**Scale sweep** (wall time, energy error, method vs n on a versioned instance bank):
+**Scale sweep** (wall time, energy error, method vs n on a versioned instance bank).
+`--ci` stays small (n≤10, no MPS, does not overwrite published CSV/JSON). The
+published ladder is even n through 40 plus extra seeds on ER / ±J / bipartite at
+cheap n:
 
 ```bash
-python -m experiments.scale_sweep          # CPU ladder, GPU-PT if the binary is present
-python -m experiments.scale_sweep --ci     # n≤10, skip MPS — what CI runs
+python -m experiments.scale_sweep --ci                         # n≤10 smoke
+python -m experiments.scale_sweep --profile local --write-report  # CPU n≤40
+python -m experiments.scale_sweep --profile gpu  --write-report  # gpu-pt iff cuda/ising_pt exists
+python -m drift.benchmarks                                     # rebuild manifest after catalog edits
 ```
 
 See [`docs/results/SCALE-sweep.md`](docs/results/SCALE-sweep.md) and `figures/scale/scale_sweep.png`.
 The scientific question and the v1 catalog live in `drift/benchmarks/instances/manifest.json`.
+A CPU-only machine records **cpu-pt**, not gpu-pt — the JSON field `gpu_pt_rows` says so.
 
 ## Stack
 
