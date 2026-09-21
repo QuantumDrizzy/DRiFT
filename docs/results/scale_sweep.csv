@@ -1,103 +1,103 @@
 id,family,n,seed,method,certified,energy,known_energy,energy_error,wall_s,chi,chi_kept,notes
-v1.maxcut-er.n008.s001,maxcut-er,8,1,exact,True,-9.0,-9.0,0.0,0.00025171999993744976,,,certified exact enumeration
-v1.pmj-glass.n008.s007,pmj-glass,8,7,exact,True,-14.0,-14.0,0.0,0.00010906099998919672,,,certified exact enumeration
-v1.bipartite-maxcut.n008.s002,bipartite-maxcut,8,2,exact,True,-9.0,-9.0,0.0,9.200400006648124e-05,,,certified exact enumeration
-v1.ferro-chain.n008.s000,ferro-chain,8,0,exact,True,-7.0,-7.0,0.0,7.686000003559457e-05,,,certified exact enumeration
-v1.maxcut-er.n008.s002,maxcut-er,8,2,exact,True,-8.0,-8.0,0.0,7.46609999850989e-05,,,certified exact enumeration
-v1.maxcut-er.n008.s003,maxcut-er,8,3,exact,True,-9.0,-9.0,0.0,7.072699997934251e-05,,,certified exact enumeration
-v1.pmj-glass.n008.s008,pmj-glass,8,8,exact,True,-14.0,-14.0,0.0,6.951299997126625e-05,,,certified exact enumeration
-v1.pmj-glass.n008.s009,pmj-glass,8,9,exact,True,-10.0,-10.0,0.0,7.109399996352295e-05,,,certified exact enumeration
-v1.bipartite-maxcut.n008.s003,bipartite-maxcut,8,3,exact,True,-9.0,-9.0,0.0,7.752299995900103e-05,,,certified exact enumeration
-v1.bipartite-maxcut.n008.s004,bipartite-maxcut,8,4,exact,True,-6.0,-6.0,0.0,7.406700001411082e-05,,,certified exact enumeration
-v1.maxcut-er.n010.s001,maxcut-er,10,1,exact,True,-9.0,-9.0,0.0,0.00028430100007881265,,,certified exact enumeration
-v1.pmj-glass.n010.s007,pmj-glass,10,7,exact,True,-19.0,-19.0,0.0,0.00010970100004215055,,,certified exact enumeration
-v1.bipartite-maxcut.n010.s002,bipartite-maxcut,10,2,exact,True,-13.0,-13.0,0.0,9.958999999071239e-05,,,certified exact enumeration
-v1.ferro-chain.n010.s000,ferro-chain,10,0,exact,True,-9.0,-9.0,0.0,9.270300006392063e-05,,,certified exact enumeration
-v1.maxcut-er.n010.s002,maxcut-er,10,2,exact,True,-12.0,-12.0,0.0,9.12609999659253e-05,,,certified exact enumeration
-v1.maxcut-er.n010.s003,maxcut-er,10,3,exact,True,-12.0,-12.0,0.0,8.841700002903963e-05,,,certified exact enumeration
-v1.pmj-glass.n010.s008,pmj-glass,10,8,exact,True,-15.0,-15.0,0.0,9.119000003465771e-05,,,certified exact enumeration
-v1.pmj-glass.n010.s009,pmj-glass,10,9,exact,True,-19.0,-19.0,0.0,9.531999990031181e-05,,,certified exact enumeration
-v1.bipartite-maxcut.n010.s003,bipartite-maxcut,10,3,exact,True,-14.0,-14.0,0.0,9.459499995045917e-05,,,certified exact enumeration
-v1.bipartite-maxcut.n010.s004,bipartite-maxcut,10,4,exact,True,-9.0,-9.0,0.0,9.35770000296543e-05,,,certified exact enumeration
-v1.maxcut-er.n012.s001,maxcut-er,12,1,exact,True,-15.0,-15.0,0.0,0.0007223439999961556,,,certified exact enumeration
-v1.pmj-glass.n012.s007,pmj-glass,12,7,exact,True,-32.0,-32.0,0.0,0.0005338820000133637,,,certified exact enumeration
-v1.bipartite-maxcut.n012.s002,bipartite-maxcut,12,2,exact,True,-18.0,-18.0,0.0,0.000525775999903999,,,certified exact enumeration
-v1.ferro-chain.n012.s000,ferro-chain,12,0,exact,True,-11.0,-11.0,0.0,0.00047699399999601155,,,certified exact enumeration
-v1.maxcut-er.n012.s002,maxcut-er,12,2,exact,True,-18.0,-18.0,0.0,0.0004907329999923604,,,certified exact enumeration
-v1.maxcut-er.n012.s003,maxcut-er,12,3,exact,True,-16.0,-16.0,0.0,0.0004903219999050634,,,certified exact enumeration
-v1.pmj-glass.n012.s008,pmj-glass,12,8,exact,True,-28.0,-28.0,0.0,0.0004988670000329876,,,certified exact enumeration
-v1.pmj-glass.n012.s009,pmj-glass,12,9,exact,True,-26.0,-26.0,0.0,0.0004900509999288261,,,certified exact enumeration
-v1.bipartite-maxcut.n012.s003,bipartite-maxcut,12,3,exact,True,-19.0,-19.0,0.0,0.0005081699999891498,,,certified exact enumeration
-v1.bipartite-maxcut.n012.s004,bipartite-maxcut,12,4,exact,True,-13.0,-13.0,0.0,0.0004973019999852113,,,certified exact enumeration
-v1.maxcut-er.n014.s001,maxcut-er,14,1,exact,True,-18.0,-18.0,0.0,0.003483845999994628,,,certified exact enumeration
-v1.pmj-glass.n014.s007,pmj-glass,14,7,exact,True,-33.0,-33.0,0.0,0.0019383589999506512,,,certified exact enumeration
-v1.bipartite-maxcut.n014.s002,bipartite-maxcut,14,2,exact,True,-23.0,-23.0,0.0,0.0018879379999816592,,,certified exact enumeration
-v1.ferro-chain.n014.s000,ferro-chain,14,0,exact,True,-13.0,-13.0,0.0,0.001824859000066681,,,certified exact enumeration
-v1.maxcut-er.n014.s002,maxcut-er,14,2,exact,True,-17.0,-17.0,0.0,0.0018689580000454953,,,certified exact enumeration
-v1.maxcut-er.n014.s003,maxcut-er,14,3,exact,True,-19.0,-19.0,0.0,0.0018151380000972495,,,certified exact enumeration
-v1.pmj-glass.n014.s008,pmj-glass,14,8,exact,True,-31.0,-31.0,0.0,0.0018500109999877168,,,certified exact enumeration
-v1.pmj-glass.n014.s009,pmj-glass,14,9,exact,True,-33.0,-33.0,0.0,0.0018312810000225,,,certified exact enumeration
-v1.bipartite-maxcut.n014.s003,bipartite-maxcut,14,3,exact,True,-23.0,-23.0,0.0,0.0018671439999025097,,,certified exact enumeration
-v1.bipartite-maxcut.n014.s004,bipartite-maxcut,14,4,exact,True,-21.0,-21.0,0.0,0.001917513000080362,,,certified exact enumeration
-v1.maxcut-er.n016.s001,maxcut-er,16,1,exact,True,-22.0,-22.0,0.0,0.009405646999994133,,,certified exact enumeration
-v1.pmj-glass.n016.s007,pmj-glass,16,7,exact,True,-42.0,-42.0,0.0,0.005961629000012181,,,certified exact enumeration
-v1.bipartite-maxcut.n016.s002,bipartite-maxcut,16,2,exact,True,-31.0,-31.0,0.0,0.005801678000011634,,,certified exact enumeration
-v1.ferro-chain.n016.s000,ferro-chain,16,0,exact,True,-15.0,-15.0,0.0,0.0055912919999627775,,,certified exact enumeration
-v1.maxcut-er.n016.s002,maxcut-er,16,2,exact,True,-30.0,-30.0,0.0,0.0057035870000845534,,,certified exact enumeration
-v1.maxcut-er.n016.s003,maxcut-er,16,3,exact,True,-22.0,-22.0,0.0,0.005821165000043038,,,certified exact enumeration
-v1.pmj-glass.n016.s008,pmj-glass,16,8,exact,True,-46.0,-46.0,0.0,0.005638565000026574,,,certified exact enumeration
-v1.pmj-glass.n016.s009,pmj-glass,16,9,exact,True,-46.0,-46.0,0.0,0.005675637999956962,,,certified exact enumeration
-v1.bipartite-maxcut.n016.s003,bipartite-maxcut,16,3,exact,True,-31.0,-31.0,0.0,0.005636693999917952,,,certified exact enumeration
-v1.bipartite-maxcut.n016.s004,bipartite-maxcut,16,4,exact,True,-29.0,-29.0,0.0,0.005692959999919367,,,certified exact enumeration
-v1.maxcut-er.n018.s001,maxcut-er,18,1,exact,True,-30.0,-30.0,0.0,0.04178679699998611,,,certified exact enumeration
-v1.pmj-glass.n018.s007,pmj-glass,18,7,exact,True,-49.0,-49.0,0.0,0.023510169000019232,,,certified exact enumeration
-v1.bipartite-maxcut.n018.s002,bipartite-maxcut,18,2,exact,True,-37.0,-37.0,0.0,0.02430195299996285,,,certified exact enumeration
-v1.ferro-chain.n018.s000,ferro-chain,18,0,exact,True,-17.0,-17.0,0.0,0.02243939999993927,,,certified exact enumeration
-v1.maxcut-er.n018.s002,maxcut-er,18,2,exact,True,-25.0,-25.0,0.0,0.02268357399998422,,,certified exact enumeration
-v1.maxcut-er.n018.s003,maxcut-er,18,3,exact,True,-27.0,-27.0,0.0,0.02252987999997913,,,certified exact enumeration
-v1.pmj-glass.n018.s008,pmj-glass,18,8,exact,True,-55.0,-55.0,0.0,0.022688914000013938,,,certified exact enumeration
-v1.pmj-glass.n018.s009,pmj-glass,18,9,exact,True,-45.0,-45.0,0.0,0.02255949600009899,,,certified exact enumeration
-v1.bipartite-maxcut.n018.s003,bipartite-maxcut,18,3,exact,True,-39.0,-39.0,0.0,0.0227693020000288,,,certified exact enumeration
-v1.bipartite-maxcut.n018.s004,bipartite-maxcut,18,4,exact,True,-37.0,-37.0,0.0,0.022337847000017064,,,certified exact enumeration
-v1.maxcut-er.n020.s001,maxcut-er,20,1,cpu-pt,False,-33.0,-33.0,0.0,2.587911661000021,,,heuristic minimum; not certified
-v1.pmj-glass.n020.s007,pmj-glass,20,7,cpu-pt,False,-66.0,-66.0,0.0,2.4861819019999984,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n020.s002,bipartite-maxcut,20,2,cpu-pt,False,-51.0,-51.0,0.0,2.4650865339999655,,,heuristic minimum; not certified
-v1.ferro-chain.n020.s000,ferro-chain,20,0,cpu-pt,False,-19.0,-19.0,0.0,2.417241022999974,,,heuristic minimum; not certified
-v1.maxcut-er.n020.s002,maxcut-er,20,2,cpu-pt,False,-31.0,-31.0,0.0,2.4388880159999644,,,heuristic minimum; not certified
-v1.pmj-glass.n020.s008,pmj-glass,20,8,cpu-pt,False,-64.0,-64.0,0.0,2.471970447999979,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n020.s003,bipartite-maxcut,20,3,cpu-pt,False,-47.0,-47.0,0.0,2.501852819000078,,,heuristic minimum; not certified
-v1.maxcut-er.n022.s001,maxcut-er,22,1,cpu-pt,False,-34.0,,,2.737551974999974,,,heuristic minimum; not certified
-v1.pmj-glass.n022.s007,pmj-glass,22,7,cpu-pt,False,-69.0,,,2.7196520690000625,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n022.s002,bipartite-maxcut,22,2,cpu-pt,False,-61.0,-61.0,0.0,2.7120267190000504,,,heuristic minimum; not certified
-v1.ferro-chain.n022.s000,ferro-chain,22,0,cpu-pt,False,-21.0,-21.0,0.0,2.6517644360000077,,,heuristic minimum; not certified
-v1.maxcut-er.n024.s001,maxcut-er,24,1,cpu-pt,False,-48.0,,,2.945874756999956,,,heuristic minimum; not certified
-v1.pmj-glass.n024.s007,pmj-glass,24,7,cpu-pt,False,-68.0,,,2.9616628109999965,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n024.s002,bipartite-maxcut,24,2,cpu-pt,False,-70.0,-70.0,0.0,2.9532929470000227,,,heuristic minimum; not certified
-v1.ferro-chain.n024.s000,ferro-chain,24,0,cpu-pt,False,-23.0,-23.0,0.0,2.8773524569999154,,,heuristic minimum; not certified
-v1.maxcut-er.n028.s001,maxcut-er,28,1,cpu-pt,False,-57.0,,,3.431147937999981,,,heuristic minimum; not certified
-v1.pmj-glass.n028.s007,pmj-glass,28,7,cpu-pt,False,-92.0,,,3.452567517000034,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n028.s002,bipartite-maxcut,28,2,cpu-pt,False,-94.0,-94.0,0.0,3.4487855810000383,,,heuristic minimum; not certified
-v1.ferro-chain.n028.s000,ferro-chain,28,0,cpu-pt,False,-27.0,-27.0,0.0,3.362635915999931,,,heuristic minimum; not certified
-v1.maxcut-er.n032.s001,maxcut-er,32,1,cpu-pt,False,-66.0,,,3.9138767719999805,,,heuristic minimum; not certified
-v1.pmj-glass.n032.s007,pmj-glass,32,7,cpu-pt,False,-122.0,,,3.9526799369999708,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n032.s002,bipartite-maxcut,32,2,cpu-pt,False,-132.0,-132.0,0.0,3.9717693200000213,,,heuristic minimum; not certified
-v1.ferro-chain.n032.s000,ferro-chain,32,0,cpu-pt,False,-31.0,-31.0,0.0,3.877220770000008,,,heuristic minimum; not certified
-v1.maxcut-er.n036.s001,maxcut-er,36,1,cpu-pt,False,-79.0,,,4.506435753000005,,,heuristic minimum; not certified
-v1.pmj-glass.n036.s007,pmj-glass,36,7,cpu-pt,False,-152.0,,,4.48896520400001,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n036.s002,bipartite-maxcut,36,2,cpu-pt,False,-172.0,-172.0,0.0,4.448242542999992,,,heuristic minimum; not certified
-v1.ferro-chain.n036.s000,ferro-chain,36,0,cpu-pt,False,-35.0,-35.0,0.0,4.301153010000007,,,heuristic minimum; not certified
-v1.maxcut-er.n040.s001,maxcut-er,40,1,cpu-pt,False,-95.0,,,4.886206727999934,,,heuristic minimum; not certified
-v1.pmj-glass.n040.s007,pmj-glass,40,7,cpu-pt,False,-182.0,,,4.89718544599998,,,heuristic minimum; not certified
-v1.bipartite-maxcut.n040.s002,bipartite-maxcut,40,2,cpu-pt,False,-207.0,-207.0,0.0,4.912342684999999,,,heuristic minimum; not certified
-v1.ferro-chain.n040.s000,ferro-chain,40,0,cpu-pt,False,-39.0,-39.0,0.0,4.76641563599992,,,heuristic minimum; not certified
-v1.crystal.n016.s000,crystal,16,0,exact,True,-32.0,-32.0,0.0,0.010863011999958871,,,certified exact enumeration
-v1.crystal.n024.s000,crystal,24,0,cpu-pt,False,-48.0,-48.0,0.0,2.950970331999997,,,heuristic minimum; not certified
-v1.crystal.n032.s000,crystal,32,0,cpu-pt,False,-64.0,-64.0,0.0,3.8805477099999734,,,heuristic minimum; not certified
-v1.crystal.n040.s000,crystal,40,0,cpu-pt,False,-80.0,-80.0,0.0,4.833909113000004,,,heuristic minimum; not certified
-v1.tfim-chain.n008.s000,tfim-chain,8,0,mps,False,-9.837872305307622,-9.837951447459421,7.914215179916084e-05,0.02029130799996892,4,13,MPS/TEBD (variational; never certified)
-v1.tfim-chain.n010.s000,tfim-chain,10,0,mps,False,-12.381203118580752,-12.381489999654734,0.00028688107398266993,0.02742019300001175,4,16,MPS/TEBD (variational; never certified)
-v1.tfim-chain.n012.s000,tfim-chain,12,0,mps,False,-14.925264725892774,-14.925971109908641,0.0007063840158672008,0.04021664599997621,4,16,MPS/TEBD (variational; never certified)
-v1.tfim-chain.n014.s000,tfim-chain,14,0,mps,False,-17.46988611722098,-17.471004054731782,0.001117937510802136,0.07674446900000476,4,16,MPS/TEBD (variational; never certified)
-v1.tfim-chain.n016.s000,tfim-chain,16,0,mps,False,-20.0145175378815,,,0.09456382200005464,5,16,MPS/TEBD (variational; never certified)
+v1.maxcut-er.n008.s001,maxcut-er,8,1,exact,True,-9.0,-9.0,0.0,0.0004896000027656555,,,certified exact enumeration
+v1.pmj-glass.n008.s007,pmj-glass,8,7,exact,True,-14.0,-14.0,0.0,0.0003129999968223274,,,certified exact enumeration
+v1.bipartite-maxcut.n008.s002,bipartite-maxcut,8,2,exact,True,-9.0,-9.0,0.0,0.00030990003142505884,,,certified exact enumeration
+v1.ferro-chain.n008.s000,ferro-chain,8,0,exact,True,-7.0,-7.0,0.0,0.0002885999856516719,,,certified exact enumeration
+v1.maxcut-er.n008.s002,maxcut-er,8,2,exact,True,-8.0,-8.0,0.0,0.00030720001086592674,,,certified exact enumeration
+v1.maxcut-er.n008.s003,maxcut-er,8,3,exact,True,-9.0,-9.0,0.0,0.00029689999064430594,,,certified exact enumeration
+v1.pmj-glass.n008.s008,pmj-glass,8,8,exact,True,-14.0,-14.0,0.0,0.00029879994690418243,,,certified exact enumeration
+v1.pmj-glass.n008.s009,pmj-glass,8,9,exact,True,-10.0,-10.0,0.0,0.0003168000257574022,,,certified exact enumeration
+v1.bipartite-maxcut.n008.s003,bipartite-maxcut,8,3,exact,True,-9.0,-9.0,0.0,0.0002953999792225659,,,certified exact enumeration
+v1.bipartite-maxcut.n008.s004,bipartite-maxcut,8,4,exact,True,-6.0,-6.0,0.0,0.0002948999754153192,,,certified exact enumeration
+v1.maxcut-er.n010.s001,maxcut-er,10,1,exact,True,-9.0,-9.0,0.0,0.00043379998533055186,,,certified exact enumeration
+v1.pmj-glass.n010.s007,pmj-glass,10,7,exact,True,-19.0,-19.0,0.0,0.0004214000073261559,,,certified exact enumeration
+v1.bipartite-maxcut.n010.s002,bipartite-maxcut,10,2,exact,True,-13.0,-13.0,0.0,0.00044079998042434454,,,certified exact enumeration
+v1.ferro-chain.n010.s000,ferro-chain,10,0,exact,True,-9.0,-9.0,0.0,0.0004086000262759626,,,certified exact enumeration
+v1.maxcut-er.n010.s002,maxcut-er,10,2,exact,True,-12.0,-12.0,0.0,0.00041229999624192715,,,certified exact enumeration
+v1.maxcut-er.n010.s003,maxcut-er,10,3,exact,True,-12.0,-12.0,0.0,0.0004037999897263944,,,certified exact enumeration
+v1.pmj-glass.n010.s008,pmj-glass,10,8,exact,True,-15.0,-15.0,0.0,0.00041969999438151717,,,certified exact enumeration
+v1.pmj-glass.n010.s009,pmj-glass,10,9,exact,True,-19.0,-19.0,0.0,0.00042070000199601054,,,certified exact enumeration
+v1.bipartite-maxcut.n010.s003,bipartite-maxcut,10,3,exact,True,-14.0,-14.0,0.0,0.00040580000495538116,,,certified exact enumeration
+v1.bipartite-maxcut.n010.s004,bipartite-maxcut,10,4,exact,True,-9.0,-9.0,0.0,0.0004265999887138605,,,certified exact enumeration
+v1.maxcut-er.n012.s001,maxcut-er,12,1,exact,True,-15.0,-15.0,0.0,0.001559399999678135,,,certified exact enumeration
+v1.pmj-glass.n012.s007,pmj-glass,12,7,exact,True,-32.0,-32.0,0.0,0.0011568000190891325,,,certified exact enumeration
+v1.bipartite-maxcut.n012.s002,bipartite-maxcut,12,2,exact,True,-18.0,-18.0,0.0,0.0011418000212870538,,,certified exact enumeration
+v1.ferro-chain.n012.s000,ferro-chain,12,0,exact,True,-11.0,-11.0,0.0,0.0011350000277161598,,,certified exact enumeration
+v1.maxcut-er.n012.s002,maxcut-er,12,2,exact,True,-18.0,-18.0,0.0,0.0009805000154301524,,,certified exact enumeration
+v1.maxcut-er.n012.s003,maxcut-er,12,3,exact,True,-16.0,-16.0,0.0,0.0011457999935373664,,,certified exact enumeration
+v1.pmj-glass.n012.s008,pmj-glass,12,8,exact,True,-28.0,-28.0,0.0,0.001146599999628961,,,certified exact enumeration
+v1.pmj-glass.n012.s009,pmj-glass,12,9,exact,True,-26.0,-26.0,0.0,0.0011371999862603843,,,certified exact enumeration
+v1.bipartite-maxcut.n012.s003,bipartite-maxcut,12,3,exact,True,-19.0,-19.0,0.0,0.0011854000040329993,,,certified exact enumeration
+v1.bipartite-maxcut.n012.s004,bipartite-maxcut,12,4,exact,True,-13.0,-13.0,0.0,0.001188000023830682,,,certified exact enumeration
+v1.maxcut-er.n014.s001,maxcut-er,14,1,exact,True,-18.0,-18.0,0.0,0.005694699997548014,,,certified exact enumeration
+v1.pmj-glass.n014.s007,pmj-glass,14,7,exact,True,-33.0,-33.0,0.0,0.00533090002136305,,,certified exact enumeration
+v1.bipartite-maxcut.n014.s002,bipartite-maxcut,14,2,exact,True,-23.0,-23.0,0.0,0.005356399982701987,,,certified exact enumeration
+v1.ferro-chain.n014.s000,ferro-chain,14,0,exact,True,-13.0,-13.0,0.0,0.005550300003960729,,,certified exact enumeration
+v1.maxcut-er.n014.s002,maxcut-er,14,2,exact,True,-17.0,-17.0,0.0,0.005248999979812652,,,certified exact enumeration
+v1.maxcut-er.n014.s003,maxcut-er,14,3,exact,True,-19.0,-19.0,0.0,0.00564930000109598,,,certified exact enumeration
+v1.pmj-glass.n014.s008,pmj-glass,14,8,exact,True,-31.0,-31.0,0.0,0.005372999992687255,,,certified exact enumeration
+v1.pmj-glass.n014.s009,pmj-glass,14,9,exact,True,-33.0,-33.0,0.0,0.00548200000775978,,,certified exact enumeration
+v1.bipartite-maxcut.n014.s003,bipartite-maxcut,14,3,exact,True,-23.0,-23.0,0.0,0.005315100017469376,,,certified exact enumeration
+v1.bipartite-maxcut.n014.s004,bipartite-maxcut,14,4,exact,True,-21.0,-21.0,0.0,0.006084199994802475,,,certified exact enumeration
+v1.maxcut-er.n016.s001,maxcut-er,16,1,exact,True,-22.0,-22.0,0.0,0.022783599968533963,,,certified exact enumeration
+v1.pmj-glass.n016.s007,pmj-glass,16,7,exact,True,-42.0,-42.0,0.0,0.027250299986917526,,,certified exact enumeration
+v1.bipartite-maxcut.n016.s002,bipartite-maxcut,16,2,exact,True,-31.0,-31.0,0.0,0.023225199955049902,,,certified exact enumeration
+v1.ferro-chain.n016.s000,ferro-chain,16,0,exact,True,-15.0,-15.0,0.0,0.023405699990689754,,,certified exact enumeration
+v1.maxcut-er.n016.s002,maxcut-er,16,2,exact,True,-30.0,-30.0,0.0,0.023724700033199042,,,certified exact enumeration
+v1.maxcut-er.n016.s003,maxcut-er,16,3,exact,True,-22.0,-22.0,0.0,0.023012899968307465,,,certified exact enumeration
+v1.pmj-glass.n016.s008,pmj-glass,16,8,exact,True,-46.0,-46.0,0.0,0.023127099964767694,,,certified exact enumeration
+v1.pmj-glass.n016.s009,pmj-glass,16,9,exact,True,-46.0,-46.0,0.0,0.02337809995515272,,,certified exact enumeration
+v1.bipartite-maxcut.n016.s003,bipartite-maxcut,16,3,exact,True,-31.0,-31.0,0.0,0.02364970004418865,,,certified exact enumeration
+v1.bipartite-maxcut.n016.s004,bipartite-maxcut,16,4,exact,True,-29.0,-29.0,0.0,0.022976099979132414,,,certified exact enumeration
+v1.maxcut-er.n018.s001,maxcut-er,18,1,exact,True,-30.0,-30.0,0.0,0.10567449999507517,,,certified exact enumeration
+v1.pmj-glass.n018.s007,pmj-glass,18,7,exact,True,-49.0,-49.0,0.0,0.11880560003919527,,,certified exact enumeration
+v1.bipartite-maxcut.n018.s002,bipartite-maxcut,18,2,exact,True,-37.0,-37.0,0.0,0.1272330999490805,,,certified exact enumeration
+v1.ferro-chain.n018.s000,ferro-chain,18,0,exact,True,-17.0,-17.0,0.0,0.10280100000090897,,,certified exact enumeration
+v1.maxcut-er.n018.s002,maxcut-er,18,2,exact,True,-25.0,-25.0,0.0,0.11658589995931834,,,certified exact enumeration
+v1.maxcut-er.n018.s003,maxcut-er,18,3,exact,True,-27.0,-27.0,0.0,0.10421520000090823,,,certified exact enumeration
+v1.pmj-glass.n018.s008,pmj-glass,18,8,exact,True,-55.0,-55.0,0.0,0.10342759999912232,,,certified exact enumeration
+v1.pmj-glass.n018.s009,pmj-glass,18,9,exact,True,-45.0,-45.0,0.0,0.11425350001081824,,,certified exact enumeration
+v1.bipartite-maxcut.n018.s003,bipartite-maxcut,18,3,exact,True,-39.0,-39.0,0.0,0.10741649998817593,,,certified exact enumeration
+v1.bipartite-maxcut.n018.s004,bipartite-maxcut,18,4,exact,True,-37.0,-37.0,0.0,0.1232138000195846,,,certified exact enumeration
+v1.maxcut-er.n020.s001,maxcut-er,20,1,gpu-pt,False,-33.0,-33.0,0.0,0.5132498000166379,,,heuristic minimum; not certified
+v1.pmj-glass.n020.s007,pmj-glass,20,7,gpu-pt,False,-66.0,-66.0,0.0,0.5978034000145271,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n020.s002,bipartite-maxcut,20,2,gpu-pt,False,-51.0,-51.0,0.0,0.4716164999990724,,,heuristic minimum; not certified
+v1.ferro-chain.n020.s000,ferro-chain,20,0,gpu-pt,False,-19.0,-19.0,0.0,0.4467638999922201,,,heuristic minimum; not certified
+v1.maxcut-er.n020.s002,maxcut-er,20,2,gpu-pt,False,-31.0,-31.0,0.0,0.467555099981837,,,heuristic minimum; not certified
+v1.pmj-glass.n020.s008,pmj-glass,20,8,gpu-pt,False,-64.0,-64.0,0.0,0.5806632000021636,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n020.s003,bipartite-maxcut,20,3,gpu-pt,False,-47.0,-47.0,0.0,0.4568581000203267,,,heuristic minimum; not certified
+v1.maxcut-er.n022.s001,maxcut-er,22,1,gpu-pt,False,-34.0,,,0.5043450000230223,,,heuristic minimum; not certified
+v1.pmj-glass.n022.s007,pmj-glass,22,7,gpu-pt,False,-69.0,,,0.7876066999742761,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n022.s002,bipartite-maxcut,22,2,gpu-pt,False,-61.0,-61.0,0.0,0.4613643999909982,,,heuristic minimum; not certified
+v1.ferro-chain.n022.s000,ferro-chain,22,0,gpu-pt,False,-21.0,-21.0,0.0,0.4724413999938406,,,heuristic minimum; not certified
+v1.maxcut-er.n024.s001,maxcut-er,24,1,gpu-pt,False,-48.0,,,0.49955069995485246,,,heuristic minimum; not certified
+v1.pmj-glass.n024.s007,pmj-glass,24,7,gpu-pt,False,-68.0,,,0.6180885000503622,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n024.s002,bipartite-maxcut,24,2,gpu-pt,False,-70.0,-70.0,0.0,0.48111860000062734,,,heuristic minimum; not certified
+v1.ferro-chain.n024.s000,ferro-chain,24,0,gpu-pt,False,-23.0,-23.0,0.0,0.45706290000816807,,,heuristic minimum; not certified
+v1.maxcut-er.n028.s001,maxcut-er,28,1,gpu-pt,False,-57.0,,,0.5560914999805391,,,heuristic minimum; not certified
+v1.pmj-glass.n028.s007,pmj-glass,28,7,gpu-pt,False,-92.0,,,0.7444417999940924,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n028.s002,bipartite-maxcut,28,2,gpu-pt,False,-94.0,-94.0,0.0,0.4624146000132896,,,heuristic minimum; not certified
+v1.ferro-chain.n028.s000,ferro-chain,28,0,gpu-pt,False,-27.0,-27.0,0.0,0.4768305000034161,,,heuristic minimum; not certified
+v1.maxcut-er.n032.s001,maxcut-er,32,1,gpu-pt,False,-66.0,,,0.4682545000105165,,,heuristic minimum; not certified
+v1.pmj-glass.n032.s007,pmj-glass,32,7,gpu-pt,False,-122.0,,,0.7375170000013895,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n032.s002,bipartite-maxcut,32,2,gpu-pt,False,-132.0,-132.0,0.0,0.44806329999119043,,,heuristic minimum; not certified
+v1.ferro-chain.n032.s000,ferro-chain,32,0,gpu-pt,False,-31.0,-31.0,0.0,0.4485786999575794,,,heuristic minimum; not certified
+v1.maxcut-er.n036.s001,maxcut-er,36,1,gpu-pt,False,-79.0,,,0.5163961999933235,,,heuristic minimum; not certified
+v1.pmj-glass.n036.s007,pmj-glass,36,7,gpu-pt,False,-152.0,,,0.8477801000117324,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n036.s002,bipartite-maxcut,36,2,gpu-pt,False,-172.0,-172.0,0.0,0.4429480999824591,,,heuristic minimum; not certified
+v1.ferro-chain.n036.s000,ferro-chain,36,0,gpu-pt,False,-35.0,-35.0,0.0,0.4480801999452524,,,heuristic minimum; not certified
+v1.maxcut-er.n040.s001,maxcut-er,40,1,gpu-pt,False,-95.0,,,0.5579359999974258,,,heuristic minimum; not certified
+v1.pmj-glass.n040.s007,pmj-glass,40,7,gpu-pt,False,-182.0,,,0.8609546999796294,,,heuristic minimum; not certified
+v1.bipartite-maxcut.n040.s002,bipartite-maxcut,40,2,gpu-pt,False,-207.0,-207.0,0.0,0.5103202000027522,,,heuristic minimum; not certified
+v1.ferro-chain.n040.s000,ferro-chain,40,0,gpu-pt,False,-39.0,-39.0,0.0,0.4552868000464514,,,heuristic minimum; not certified
+v1.crystal.n016.s000,crystal,16,0,exact,True,-32.0,-32.0,0.0,0.03419509995728731,,,certified exact enumeration
+v1.crystal.n024.s000,crystal,24,0,gpu-pt,False,-48.0,-48.0,0.0,0.4928506999858655,,,heuristic minimum; not certified
+v1.crystal.n032.s000,crystal,32,0,gpu-pt,False,-64.0,-64.0,0.0,0.5019539000350051,,,heuristic minimum; not certified
+v1.crystal.n040.s000,crystal,40,0,gpu-pt,False,-80.0,-80.0,0.0,0.537419400003273,,,heuristic minimum; not certified
+v1.tfim-chain.n008.s000,tfim-chain,8,0,mps,False,-9.837872305307622,-9.837951447459421,7.914215179916084e-05,0.10270290001062676,4,13,MPS/TEBD (variational; never certified)
+v1.tfim-chain.n010.s000,tfim-chain,10,0,mps,False,-12.38120311858075,-12.381489999654734,0.0002868810739844463,0.14338369999313727,4,16,MPS/TEBD (variational; never certified)
+v1.tfim-chain.n012.s000,tfim-chain,12,0,mps,False,-14.925264725892774,-14.925971109908641,0.0007063840158672008,0.21815929998410866,4,16,MPS/TEBD (variational; never certified)
+v1.tfim-chain.n014.s000,tfim-chain,14,0,mps,False,-17.46988611722098,-17.471004054731782,0.001117937510802136,0.3504677999881096,4,16,MPS/TEBD (variational; never certified)
+v1.tfim-chain.n016.s000,tfim-chain,16,0,mps,False,-20.014517537881495,,,0.39231840003049,5,16,MPS/TEBD (variational; never certified)
 v1.tfim-chain.n020.s000,tfim-chain,20,0,skipped,False,,,,0.0,,,MPS skipped: n=20 > mps_n_max=16
 v1.tfim-chain.n024.s000,tfim-chain,24,0,skipped,False,,,,0.0,,,MPS skipped: n=24 > mps_n_max=16
