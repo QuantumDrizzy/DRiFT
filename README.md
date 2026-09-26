@@ -2,6 +2,11 @@
 
 > *A microscope for physical computation.*
 
+**Place in the ecosystem.** DRiFT is the engine of computronium, and the Ising oracle every
+other solver is checked against: OSCILLON, TRELLIS, QuBLAR's annealer. Its states cross to
+Blaze (MPS), and its CUDA kernel is a LYTH candidate. See
+[ADR-0005](docs/ADR-0005-computronium-engine.md).
+
 DRIFT is a sandbox for **understanding how matter computes by minimizing energy**. It is
 not built to prove a thesis or beat a benchmark — it is built to let you *see and measure*
 one deep idea: that optimization, self-assembly, self-replication, and neural memory are
