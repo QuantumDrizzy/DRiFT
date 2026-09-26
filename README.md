@@ -144,6 +144,14 @@ and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
 
 ## Results (the figures)
 
+**A memory made of spins remembers** — the word is stored as a ground state of one Ising
+model (Hebbian couplings), the cue has 40 % of its 2304 spins flipped, and asynchronous
+dynamics recall it one spin at a time. Every frame is the state of the spins; overlap
+0.200 → 1.000, energy −46 → −1152, monotone
+([`experiments/cinema_recall.py`](experiments/cinema_recall.py)):
+
+![Hopfield recall as energy descent](figures/cinema_recall.gif)
+
 **One engine, four faces** — optimization, self-assembly, self-replication and neural memory,
 all read as ground states of one Ising Hamiltonian:
 
