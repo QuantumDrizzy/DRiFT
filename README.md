@@ -1,4 +1,4 @@
-# DRIFT
+# DRiFT
 
 > *A microscope for physical computation.*
 
@@ -142,62 +142,61 @@ and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
 [`docs/TECH-REPORT.md`](docs/TECH-REPORT.md) (lab note),
 [`docs/ROADMAP.md`](docs/ROADMAP.md), and `docs/results/PHASE{1..14}-results.md`.
 
-## Results (the figures)
+## Results: one engine, four faces
 
-**A memory made of spins remembers** — the word is stored as a ground state of one Ising
-model (Hebbian couplings), the cue has 40 % of its 2304 spins flipped, and asynchronous
-dynamics recall it one spin at a time. Every frame is the state of the spins; overlap
-0.200 → 1.000, energy −46 → −1152, monotone
-([`experiments/cinema_recall.py`](experiments/cinema_recall.py)):
+Each film is one Ising model relaxing: simulated annealing (Metropolis, geometric cooling) or,
+for memory, zero-temperature recall. Only the couplings (J, h) change from face to face.
+Every frame is the state of the spins, and the final frame is where the dynamics actually
+ended, not the best state seen along the way
+([`experiments/cinema_faces.py`](experiments/cinema_faces.py),
+[`experiments/cinema_recall.py`](experiments/cinema_recall.py)).
 
-![Hopfield recall as energy descent](figures/cinema_recall.gif)
+**Optimization: MaxCut.** 14 spins, one per node of a random graph; a spin's sign is its side
+of the cut, and a cut edge (green) lowers the energy. Annealed from T = 5, the final state cuts
+**30 edges, the exact optimum**, checked against all 2¹⁴ configurations.
 
-**One engine, four faces** — optimization, self-assembly, self-replication and neural memory,
-all read as ground states of one Ising Hamiltonian:
+![MaxCut annealing to the exact optimum](figures/cinema_maxcut.gif)
 
-![One engine, four faces](figures/phase7_four_faces.png)
+**Self-assembly: Wang tiles.** A 3×3 jigsaw with one-hot tile variables (81 spins). Every
+internal edge has its own glue colour, so the only tiling that satisfies all 12 bonds is the
+intended picture, a cross. Tiles drop in, fall out, and lock once their glues match; the final
+state has **12/12 bonds**. One caveat stays on the record: with the schedule of the original
+four-faces figure (T 5 → 0.005), the final state was the picture in **0 of 40** seeds. That
+figure shows the best state seen. Starting colder (T 2 → 0.05), it freezes into the picture
+in 3 of 12 seeds, and this film is one of them.
 
-**Real systems vs. the Landauer floor** — where actual hardware sits relative to the ultimate
-thermodynamic limits of computation:
+![Wang tiles assembling a cross](figures/cinema_tiles.gif)
 
-![Roofline vs. the Landauer floor](figures/phase7_roofline.png)
+**Self-replication: the crystal.** 256 spins on a 16×16 lattice, ferromagnetic nearest
+neighbours and antiferromagnetic next-nearest along x (frustration). The ground state is a
+unit cell, ↑↑↓↓, copied across the lattice; the final state has **period 4, E = −512**.
 
-**The dynamical (reservoir) face** — the Ising substrate as a physical reservoir; measurable
-compute capacity (memory capacity MC = 43.5 at N=200) peaking at the **edge of chaos** (ρ ≈ 1.0):
+![A frustrated lattice crystallising into period-4 stripes](figures/cinema_crystal.gif)
 
-![Reservoir capacity at the edge of chaos](figures/phase8_reservoir.png)
+**Memory: Hopfield recall.** 2304 spins store the word as a ground state (Hebbian couplings),
+next to two random patterns. The cue has 40 % of its spins flipped, and asynchronous updates
+recall it one spin at a time: overlap **0.200 → 1.000**, energy −46 → −1152, falling at every
+step. Storing three words instead fell into a *spurious mixture* (overlap 0.848), the classic
+Hopfield failure, measured and kept.
 
-**The optimization face, run quantum** — adiabatic quantum annealing reaches the same Ising
-ground state; a slower anneal succeeds, but the **spectral gap** sets the price (and when it
-closes, quantum annealing fails too):
+![Hopfield recall of the word DRiFT](figures/cinema_recall.gif)
 
-![Quantum annealing and the spectral gap](figures/phase9_quantum_anneal.png)
-
-**Quantum vs simulated annealing** — on a thin barrier (the spike) quantum annealing tunnels
-where single-spin-flip SA is walled out; on a plain funnel neither has an edge. The quantum
-advantage is specific, not general:
-
-![Quantum vs simulated annealing on the spike](figures/phase10_tunneling.png)
-
-**Factoring as a ground state** — DRIFT factors small semiprimes by relaxing a spin system to
-its energy minimum; the variable count grows slowly but the search space explodes, which is
-exactly why it stays a demonstration and not an attack:
-
-![Factoring as a ground state, and its wall](figures/phase11_factoring.png)
-
-**Universal computation** — logic gates composed into a 1-bit full adder; DRIFT's ground-state
+**Universal computation.** Logic gates composed into a 1-bit full adder; the ground-state
 engine computes its whole truth table. Any Boolean function is a ground state, bounded by the
 same wall:
 
 ![A full adder computed as a ground state](figures/phase12_universal.png)
 
-Per-phase write-ups (P1–P14) live in [`docs/results/`](docs/results/). The scale-path
-curves (n vs time, n vs energy error, method vs n, χ vs n) are in
-[`docs/results/SCALE-sweep.md`](docs/results/SCALE-sweep.md). A short lab note that
-ties the faces, the dispatcher, and those curves together without inventing numbers:
-[`docs/TECH-REPORT.md`](docs/TECH-REPORT.md).
+### Benchmark: real systems against the Landauer floor
 
-![Scale path: drift.solve vs n](figures/scale/scale_sweep.png)
+Energy per operation, log scale. Real hardware sits **six orders of magnitude above the
+Landauer limit**, and that gap is the headroom unconventional substrates compete for:
+
+![Roofline vs. the Landauer floor](figures/phase7_roofline.png)
+
+The other faces (the reservoir at the edge of chaos, quantum annealing and the spectral gap,
+tunnelling, factoring as a ground state) and the scale sweep have their figures and write-ups in
+[`docs/results/`](docs/results/) and [`docs/TECH-REPORT.md`](docs/TECH-REPORT.md).
 
 ## Install
 

@@ -74,32 +74,18 @@ def main() -> None:
 
     frames = []
     e = np.array(energies)
-    for f, state in enumerate(frames_s):
-        fig = plt.figure(figsize=(12, 5.2), dpi=80)
+    for state in frames_s:
+        # only the spins: the numbers (overlap, energy) are printed, and live in the README
+        fig = plt.figure(figsize=(12, 3.2), dpi=80)
         fig.patch.set_facecolor(BG)
-        ax = fig.add_axes([0.03, 0.30, 0.94, 0.62])
-        grid = state.reshape(H, W)
-        glow = np.where(grid > 0, 1.0, 0.08)
-        ax.imshow(glow, cmap="viridis", vmin=0, vmax=1, interpolation="nearest")
+        ax = fig.add_axes([0.01, 0.02, 0.98, 0.96])
+        ax.imshow(np.where(state.reshape(H, W) > 0, 1.0, 0.08), cmap="viridis", vmin=0, vmax=1,
+                  interpolation="nearest")
         ax.axis("off")
-        ax.set_title(f"DRiFT · a memory made of {n} spins · overlap with 'DRiFT' {overlaps[f]:+.3f}",
-                     color="#b7f5c9", fontsize=13)
-        bx = fig.add_axes([0.08, 0.08, 0.86, 0.17])
-        bx.set_facecolor(BG)
-        bx.plot(e[:f + 1], color="#5ef0a0", lw=1.8)
-        bx.set_xlim(0, len(e))
-        bx.set_ylim(e.min() - 0.05 * np.ptp(e), e.max() + 0.05 * np.ptp(e))
-        bx.set_ylabel("energy", color="#9fbfa8", fontsize=9)
-        bx.tick_params(colors="#6f8f78", labelsize=7)
-        for sp in bx.spines.values():
-            sp.set_color("#23352a")
-        fig.text(0.5, 0.005, "Hopfield memory as Ising ground states (drift.builders.hopfield) · stored: 'DRiFT' + 2 random patterns · "
-                 "cue: 40 % of spins flipped · one spin at a time, each flip lowers the energy",
-                 color="#6f8f78", ha="center", fontsize=8.5)
         buf = io.BytesIO()
         fig.savefig(buf, format="png", facecolor=BG)
         plt.close(fig)
-        frames.append(Image.open(buf).convert("RGB").quantize(colors=96, method=Image.MEDIANCUT))
+        frames.append(Image.open(buf).convert("RGB").quantize(colors=32, method=Image.MEDIANCUT))
     out = ROOT / "figures" / "cinema_recall.gif"
     frames[0].save(out, save_all=True, append_images=frames[1:], duration=90, loop=0, optimize=True)
     print(f"wrote {out} ({out.stat().st_size / 2**20:.1f} MiB); overlap {overlaps[0]:+.3f} -> "
