@@ -29,8 +29,10 @@ from drift.builders.hopfield import add_noise, hopfield_model, overlap  # noqa: 
 PAGE = np.array([13, 17, 23], float)  # #0d1117, GitHub dark
 
 
-def logo_pattern(path: Path, cols: int, rows: int, fill: float = 0.86) -> np.ndarray:
-    """The logo's saturated, bright pixels as +1, fitted (aspect kept) into cols x rows."""
+def logo_pattern(path: Path, cols: int, rows: int, fill: float = 0.86):
+    """The logo's saturated, bright pixels as +1, fitted (aspect kept) into cols x rows.
+    Also returns each cell's colour, taken from the logo itself (its dominant colour where
+    the cell is background), so a multi-colour mark keeps its colours."""
     a = np.asarray(Image.open(path).convert("RGB")).astype(float)
     mx, mn = a.max(axis=2), a.min(axis=2)
     mark = (mx > 120) & ((mx - mn) > 90)  # bright and saturated: the mark, not the black
@@ -43,15 +45,35 @@ def logo_pattern(path: Path, cols: int, rows: int, fill: float = 0.86) -> np.nda
     grid = np.zeros((rows, cols), bool)
     oy, ox = (rows - th) // 2, (cols - tw) // 2
     grid[oy:oy + th, ox:ox + tw] = np.asarray(small) > 127
-    return np.where(grid, 1.0, -1.0).ravel()
+    rgb_crop = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1] * crop[..., None]
+    weight = Image.fromarray((crop * 255).astype(np.uint8)).resize((tw, th), Image.BOX)
+    summed = np.stack([np.asarray(Image.fromarray(rgb_crop[..., c].astype(np.float32))
+                                  .resize((tw, th), Image.BOX)) for c in range(3)], -1)
+    wgt = np.asarray(weight, float)[..., None] / 255.0
+    dominant = np.median(a[mark], axis=0)
+    colours = np.tile(dominant, (rows, cols, 1))
+    local = np.where(wgt > 0.05, summed / np.maximum(wgt, 1e-6), dominant)
+    # Colour by column, not by cell: a per-cell colour would draw the mark's shape in colour
+    # while the spins are still noise, which is the answer given away. A column band shows
+    # only where a colour will be, and the shape still has to be recalled by the spins.
+    marked = (wgt[..., 0] > 0.05)
+    for x in range(tw):
+        if marked[:, x].any():
+            colours[:, ox + x] = local[marked[:, x], x].mean(axis=0)
+    return np.where(grid, 1.0, -1.0).ravel(), colours
 
 
 def paint(s: np.ndarray, cols: int, rows: int, px: int, colour: np.ndarray) -> Image.Image:
+    """colour is one RGB triple, or a (rows, cols, 3) grid of per-cell colours."""
     on = Image.fromarray(((s.reshape(rows, cols) > 0) * 255).astype(np.uint8)).resize(
         (cols * px, rows * px), Image.NEAREST)
     base = np.asarray(on.filter(ImageFilter.GaussianBlur(0.8)), float) / 255.0
     glow = np.asarray(on.filter(ImageFilter.GaussianBlur(6)), float) / 255.0
     light = np.clip(0.9 * base + 0.35 * glow, 0, 1)[..., None]
+    if colour.ndim == 3:  # per-cell colours, upsampled and softened to follow the glow
+        img = Image.fromarray(np.clip(colour, 0, 255).astype(np.uint8)).resize(
+            (cols * px, rows * px), Image.NEAREST).filter(ImageFilter.GaussianBlur(2))
+        colour = np.asarray(img, float)
     rgb = PAGE + (colour - PAGE) * light
     return Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8))
 
@@ -61,13 +83,17 @@ def main() -> None:
     ap.add_argument("logo", type=Path)
     ap.add_argument("out", type=Path)
     ap.add_argument("--colour", default="FBBA02")
+    ap.add_argument("--logo-colours", action="store_true",
+                    help="colour each cell from the logo itself (multi-colour marks)")
     ap.add_argument("--cols", type=int, default=192)
     args = ap.parse_args()
     cols, rows = args.cols, args.cols // 4
     px = max(1, 960 // cols)
     colour = np.array([int(args.colour[i:i + 2], 16) for i in (0, 2, 4)], float)
 
-    target = logo_pattern(args.logo, cols, rows)
+    target, cell_colours = logo_pattern(args.logo, cols, rows)
+    if args.logo_colours:
+        colour = cell_colours
     rng_p = np.random.default_rng(11)
     patterns = np.stack([target, rng_p.choice([-1.0, 1.0], target.size),
                          rng_p.choice([-1.0, 1.0], target.size)])
