@@ -1,5 +1,5 @@
 """
-drift.viz — visualization. Dark 'DRIFT' palette, consistent with the iNFAMØUS look.
+drift.viz — visualization. Dark 'DRIFT' palette.
 
 Every figure is a window onto the process, not a result to publish: you watch the
 energy drift down, watch the spins order, see where the ground state sits in the
