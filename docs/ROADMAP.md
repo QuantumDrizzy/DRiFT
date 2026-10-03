@@ -206,6 +206,39 @@ proving anything — each one makes a piece of the process *observable*.
 - **Honest scope:** on arbitrary frustrated instances at scale there's no oracle, so those minima are
   strong-not-certified (standard for any heuristic) — stated plainly.
 
+### Phase 15 — The drawing is the function ✅  *(see [results](results/PHASE15-results.md))*
+- **Understood:** *Phase 12's coupling graph is a drawing that computes.* One deleted line breaks
+  it; a look-alike with every graph statistic matched computes nothing; and the drawing only
+  computes while its coupling beats kT.
+- **Built:** `drift/drawing.py` — degeneracy-aware exhaustive scorer, unclamped ground set,
+  Maslov–Sneppen rewiring, Boltzmann P(correct)/ΔS/heat bill. `tests/test_drawing.py`.
+- **Measured:** rse-hpc-lab exercise 11 (ADR-004, predictions pre-registered).
+
+### Phase 16 — Graphity: geometry from a graph Hamiltonian? ✅  *(see [results](results/PHASE16-results.md))*
+- **Understood:** *cooling a complete graph under local terms gives an expander, not a lattice;*
+  the lower states are disjoint dense blocks the anneal never reaches. Geometry has to be put in.
+- **Built:** `drift/graphity.py` — bitset graphs, exact cycle counts and flip deltas, edge-flip
+  Metropolis, random-regular null. `tests/test_graphity.py`, including the quadratic-valence
+  design error as a regression.
+- **Measured:** rse-hpc-lab exercise 12 (ADR-005); 4 of 7 predictions missed, on the record.
+
+### Phase 17 — Scrambling ✅  *(see [results](results/PHASE17-results.md))*
+- **Understood:** *level statistics separate chaos from integrability; the OTOC light cone and a
+  decaying OTOC do not.*
+- **Built:** `drift/scrambling.py` — mixed-field Ising, exact reflection sector, spacing ratio,
+  exact OTOC. `tests/test_scrambling.py`.
+- **Measured:** rse-hpc-lab exercise 13 (ADR-005).
+
+### Phase 18 — The free-fermion oracle and entanglement scaling ✅  *(see [results](results/PHASE18-results.md))*
+- **Understood:** *the critical chain's entanglement grows like (c/6)·log with c = ½* — the scaling
+  MERA is built to reproduce. And **`drift.mps` under-converges at criticality with its default
+  stopping rule** (c = 0.28 at n = 64; 0.515 when run to convergence).
+- **Built:** `drift/freefermion.py` — exact Majorana solution of the open TFIM, block entropies,
+  central-charge fit; the oracle for `drift.quantum` and `drift.mps`. `tests/test_freefermion.py`.
+- **Measured:** rse-hpc-lab exercise 14 (ADR-005).
+- **Next:** a stopping rule for `drift.mps.ground_state` that critical slowing down cannot fool,
+  and a re-check of Phase 13's χ curve against this oracle.
+
 ### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
   path applies) scale with system size n for fixed instance families, when solving via `drift.solve`

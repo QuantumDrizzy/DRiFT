@@ -78,7 +78,7 @@ DRIFT/
 
 ## Status
 
-**Phases P0–P14 landed.** The engine, the four ground-state faces, the synthesis,
+**Phases P0–P18 landed.** The engine, the four ground-state faces, the synthesis,
 the *dynamical* face, the optimization face run *quantum*, the honest quantum-vs-classical
 comparison, arithmetic as a ground state, universal computation, the tensor-network solver
 that reads a ground state the way the thesis always promised, and the GPU parallel-tempering
@@ -136,6 +136,16 @@ engine that scales the optimization face past the exact wall:
   ratio is **1.0000** through n=1024. On arbitrary frustrated instances at scale, minima are
   **strong-not-certified** — stated plainly. The binary is a local Windows/sm_120 artifact and is
   **not in CI** (`docs/ADR-0004`, `docs/results/PHASE14-results.md`).
+
+- **P15–P18 — measured against pre-registered predictions** in
+  [rse-hpc-lab](https://github.com/QuantumDrizzy/rse-hpc-lab) (ADR-004, ADR-005):
+  **P15** `drift/drawing.py` — the adder's coupling graph as a drawing: one line deleted breaks it,
+  a look-alike with identical graph statistics computes nothing, and it computes only while the
+  coupling beats kT. **P16** `drift/graphity.py` — edge-flip graphity from the complete graph gives an
+  expander, never a lattice (4 of 7 predictions missed, on the record). **P17**
+  `drift/scrambling.py` — level statistics separate chaos from free fermions; the OTOC light cone
+  does not. **P18** `drift/freefermion.py` — the exact TFIM oracle: c = 0.502 at n = 512, and it
+  catches `drift.mps` under-converging at criticality with its default stopping rule.
 
 The two synthesis figures sit in `figures/phase7_four_faces.png` (one engine, four faces)
 and `figures/phase7_roofline.png` (real systems vs. the Landauer floor). See
