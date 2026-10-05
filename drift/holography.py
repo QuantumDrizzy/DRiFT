@@ -213,3 +213,131 @@ def state_renyi2(state: np.ndarray, region: tuple[int, ...]) -> float:
     rho = m @ m.conj().T if m.shape[0] <= m.shape[1] else m.conj().T @ m
     tr = float(np.trace(rho).real)
     return float(-np.log(float(np.vdot(rho, rho).real) / tr**2))
+
+
+# ── phase 20: the bulk from the boundary ─────────────────────────────────────────────────────────
+# Everything below takes only the table of boundary entropies; the graph is not consulted.
+def interval_table(g: BoundaryGraph) -> np.ndarray:
+    """d[i, j] = γ of the legs i .. j−1 (cyclic): the distance between gap i and gap j (gap k sits
+    just before leg k). Symmetric, since a minimal cut separates A and its complement alike."""
+    n = g.n_legs
+    d = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i + 1, n):
+            d[i, j] = d[j, i] = min_cut(g, tuple(range(i, j)))
+    return d
+
+
+def split_weights(d: np.ndarray) -> np.ndarray:
+    """α[i, j] = ½(d[i,j] + d[i+1,j+1] − d[i,j+1] − d[i+1,j]), indices mod n: the weight of the
+    circular split that separates gaps i+1 .. j from the rest -- a conditional mutual information,
+    non-negative by strong subadditivity. α[i, j] and α[j, i] are the same split."""
+    n = d.shape[0]
+    i = np.arange(n)[:, None]
+    j = np.arange(n)[None, :]
+    a = 0.5 * (d[i, j] + d[(i + 1) % n, (j + 1) % n] - d[i, (j + 1) % n] - d[(i + 1) % n, j])
+    np.fill_diagonal(a, 0.0)
+    return a
+
+
+def rebuild_distances(alpha: np.ndarray) -> np.ndarray:
+    """Distances from split weights: d(a, b) = Σ over splits separating a and b of their weight.
+    Each split appears twice in α (as an arc and as its complement), hence the ½."""
+    n = alpha.shape[0]
+    gaps = np.arange(n)
+    out = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            if i == j or alpha[i, j] == 0.0:
+                continue
+            in_arc = ((gaps - (i + 1)) % n) <= ((j - (i + 1)) % n)    # gaps i+1 .. j, cyclic
+            sep = in_arc[:, None] != in_arc[None, :]
+            out += 0.5 * alpha[i, j] * sep
+    return out
+
+
+def gromov_delta(d: np.ndarray, every: int = 1) -> tuple[float, float]:
+    """(δ, diameter) by the four-point condition over all quadruples of every ``every``-th point."""
+    sub = d[::every, ::every]
+    m = sub.shape[0]
+    x, y, z, w = np.ix_(range(m), range(m), range(m), range(m))
+    s1 = sub[x, y] + sub[z, w]
+    s2 = sub[x, z] + sub[y, w]
+    s3 = sub[x, w] + sub[y, z]
+    s = np.sort(np.stack([s1, s2, s3]), axis=0)
+    return float((s[2] - s[1]).max() / 2.0), float(sub.max())
+
+
+def kinematic_density(alpha: np.ndarray) -> np.ndarray:
+    """A(ℓ) = Σ_i α[i, i+ℓ] for ℓ = 0 .. n−1 (A[0] = 0): the split weight at each arc length."""
+    n = alpha.shape[0]
+    return np.array([sum(alpha[i, (i + ell) % n] for i in range(n)) for ell in range(n)])
+
+
+def arc_weights(alpha: np.ndarray) -> np.ndarray:
+    """W[a, b] for 1 ≤ a ≤ b ≤ n−1: each split once, as the arc of gaps a..b that avoids gap 0."""
+    n = alpha.shape[0]
+    w = np.zeros((n, n))
+    for a in range(1, n):
+        for b in range(a, n):
+            w[a, b] = alpha[a - 1, b]
+    return w
+
+
+def max_laminar(w: np.ndarray) -> tuple[float, list[tuple[int, int]]]:
+    """Heaviest family of arcs [a, b] (1 ≤ a ≤ b ≤ n−1) that pairwise nest or are disjoint -- a tree.
+
+    F(a,b) = W[a,b] + max(F(a+1,b), F(a,b−1), max_m F(a,m) + F(m+1,b)); exact, O(n³).
+    """
+    n = w.shape[0]
+    f = np.zeros((n + 1, n + 1))
+    choice: dict[tuple[int, int], tuple] = {}
+    for length in range(1, n):
+        for a in range(1, n - length + 1):
+            b = a + length - 1
+            best, arg = 0.0, None
+            if a < b:
+                for cand, tag in ((f[a + 1, b], ("L",)), (f[a, b - 1], ("R",))):
+                    if cand > best:
+                        best, arg = cand, tag
+                for m in range(a, b):
+                    v = f[a, m] + f[m + 1, b]
+                    if v > best:
+                        best, arg = v, ("S", m)
+            f[a, b] = max(w[a, b], 0.0) + best
+            choice[(a, b)] = arg
+    chosen: list[tuple[int, int]] = []
+
+    def walk(a: int, b: int) -> None:
+        if a > b:
+            return
+        if w[a, b] > 0:
+            chosen.append((a, b))
+        arg = choice.get((a, b))
+        if arg is None:
+            return
+        if arg[0] == "L":
+            walk(a + 1, b)
+        elif arg[0] == "R":
+            walk(a, b - 1)
+        else:
+            walk(a, arg[1])
+            walk(arg[1] + 1, b)
+
+    walk(1, n - 1)
+    return float(f[1, n - 1]), chosen
+
+
+def crossing(p: tuple[int, int], q: tuple[int, int]) -> bool:
+    (a, b), (c, e) = p, q
+    return (a < c <= b < e) or (c < a <= e < b)
+
+
+def nesting_depth(arcs: list[tuple[int, int]]) -> int:
+    """Deepest chain of strictly nested arcs."""
+    arcs = sorted(set(arcs), key=lambda r: (r[1] - r[0]))
+    depth = {}
+    for k, (a, b) in enumerate(arcs):
+        inner = [depth[q] for q in arcs[:k] if a <= q[0] and q[1] <= b and q != (a, b)]
+        depth[(a, b)] = 1 + (max(inner) if inner else 0)
+    return max(depth.values(), default=0)
