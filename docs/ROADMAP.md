@@ -249,7 +249,22 @@ proving anything — each one makes a piece of the process *observable*.
 - **Built:** `drift/holography.py` -- boundary graphs, the map onto `IsingModel`, exact Z, min cut by
   max-flow, direct contraction of Gaussian random tensors. `tests/test_holography.py`, 12/12.
 - **Measured:** rse-hpc-lab exercise 22 (ADR-006); QuBLAR finds the D = ∞ wall on 78/78 large cases.
-- **Next:** phase 2 -- reconstruct the bulk graph from boundary entropies alone (open research).
+- **Next (done, phase 20):** phase 2 -- reconstruct the bulk graph from boundary entropies alone (open research).
+
+### Phase 20 — The bulk from the boundary ✅  *(see [results](results/PHASE20-results.md))*
+- **Understood:** *the all-interval entropy table, alone, separates the three bulks.* Its circular
+  splits (conditional mutual informations, all ≥ 0) rebuild it exactly and are sparse: a random bulk
+  leaves only diametric splits (a cycle, δ/diam ½, "nothing inside"); a flat grid one family of large
+  nested splits; a hyperbolic disk a comb at five scales whose count halves per doubling (δ/diam 0.167,
+  a 1/ℓ² density read post-hoc). δ-hyperbolic is **not** tree-like: the finest hyperbolic splits cross
+  (treeness 0.167), as geodesics at every centre do.
+- **Built:** `drift/holography.py` -- interval table, split weights and rebuild, four-point Gromov δ,
+  kinematic density, the heaviest non-crossing family by exact O(n³) DP, nesting depth.
+  `tests/test_holography.py`, 27/27; 7 mutants caught.
+- **Measured:** rse-hpc-lab exercise 23 (ADR-007): P1, P2, P5 pass; P3's hyperbolic slope and P4's
+  hyperbolic treeness and depth fail, kept.
+- **Next:** finite D (the α blur), a {p,q} tiling instead of a ring lattice, and an estimator for
+  kinematic density on a discrete hierarchy -- each pre-registered before it is run.
 
 ### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
