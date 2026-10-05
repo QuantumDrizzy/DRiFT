@@ -266,6 +266,18 @@ proving anything — each one makes a piece of the process *observable*.
 - **Next:** finite D (the α blur), a {p,q} tiling instead of a ring lattice, and an estimator for
   kinematic density on a discrete hierarchy -- each pre-registered before it is run.
 
+### Phase 21 — A bulk event seen from the boundary ✅  *(see [results](results/PHASE21-results.md))*
+- **Understood:** *a change of one bulk bond is placed by the boundary only where geodesics are
+  unique.* On the hyperbolic disk every interior bond (264, rings 1-5) is located exactly; the centre
+  (twin geodesics around the core) and the rim (leg cuts tie with bulk cuts up to 8 legs) are seen but
+  not placed: 47.4 % overall. A flat grid gives the row, never the column. A random bulk is unseen
+  (98.8 %). The interval needed to see a ring halves per ring outward, to the leg floor.
+- **Built:** `drift/holography.py` -- `cut_membership` (some / every minimal cut, Picard-Queyranne on
+  one residual graph), `bond_edges`, `ring_of`. `tests/test_holography.py`, 35/35.
+- **Measured:** rse-hpc-lab exercise 24 (ADR-008): Q1, Q2, Q4, Q5 pass; Q3 hyperbolic 0.474 < 0.5, kept.
+- **Next:** two simultaneous events; a {p,q} tiling to test whether the rim blindness is the leg
+  regime or the lattice.
+
 ### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
   path applies) scale with system size n for fixed instance families, when solving via `drift.solve`
