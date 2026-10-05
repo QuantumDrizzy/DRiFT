@@ -275,8 +275,21 @@ proving anything — each one makes a piece of the process *observable*.
 - **Built:** `drift/holography.py` -- `cut_membership` (some / every minimal cut, Picard-Queyranne on
   one residual graph), `bond_edges`, `ring_of`. `tests/test_holography.py`, 35/35.
 - **Measured:** rse-hpc-lab exercise 24 (ADR-008): Q1, Q2, Q4, Q5 pass; Q3 hyperbolic 0.474 < 0.5, kept.
-- **Next:** two simultaneous events; a {p,q} tiling to test whether the rim blindness is the leg
-  regime or the lattice.
+- **Next (done, phase 22):** a {p,q} tiling to test whether the rim blindness is the leg regime or
+  the lattice -- it was the lattice. Two simultaneous events remain open.
+
+### Phase 22 — Regular hyperbolic tilings ✅  *(see [results](results/PHASE22-results.md))*
+- **Understood:** *on a regular {p,q} tiling the boundary locates every bulk bond.* On {5,4}, {4,5}
+  and {7,3} all 1107 bonds, centre and rim included, are on every minimal cut of some interval with a
+  signature no other bond shares. Phase 21's blind centre and rim were the ring lattice's, not
+  hyperbolic space's. The parity argument (ties need even p) was wrong and is refuted. The interval
+  needed to see one layer deeper grows by the tiling's own growth rate (0.85-0.97 of ln λ).
+- **Built:** `drift/holography.py` -- `pq_tiling` (Poincaré-disk reflections, dedup by centre, legs by
+  angle), `hyperbolic_distance`, `hyperbolic_angle`. `tests/test_holography.py`, 43/43; 5/5 mutants.
+- **Measured:** rse-hpc-lab exercise 25 (ADR-009): T1, T5, T6, T7 pass; T3/T4's {4,5} and T2's {7,3}
+  miss, kept.
+- **Next:** two simultaneous events (is a pair of changes still placed?), finite D, and larger
+  cut-offs.
 
 ### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
