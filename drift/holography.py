@@ -496,3 +496,40 @@ def pq_tiling(p: int, q: int, layers: int) -> BoundaryGraph:
     meta = {"p": p, "q": q, "layers": layers, "layer": layer, "tiles": tiles,
             "leg_edges": [ends[e] for _, _, e in open_edges], "max_sharing": max(len(o) for o in owners.values())}
     return BoundaryGraph(len(tiles), bonds, legs, f"{{{p},{q}}}-{layers}layers", meta)
+
+
+# ── phase 23: two events at once ─────────────────────────────────────────────────────────────────
+def strengthened(g: BoundaryGraph, edges) -> BoundaryGraph:
+    """The graph with one more unit of capacity on each given bulk edge (a sorted pair)."""
+    return BoundaryGraph(g.n, list(g.bonds) + [tuple(e) for e in edges], g.legs, g.name, g.meta)
+
+
+def pair_response(g: BoundaryGraph, region, e, f, gamma: int, some_e: bool, some_f: bool,
+                  every_e: bool, every_f: bool) -> int:
+    """Δγ(region) when bulk edges e and f are both strengthened by one unit.
+
+    Exact pruning: if either edge is on no minimal cut, the minimal cuts never see it and every cut
+    through it costs at least γ + 1, so the response is the sum of the single responses. Only when
+    both lie on some minimal cut is a max-flow needed.
+    """
+    if not (some_e and some_f):
+        return int(every_e) + int(every_f)
+    return min_cut(strengthened(g, [e, f]), region) - gamma
+
+
+def bond_distance(g: BoundaryGraph) -> np.ndarray:
+    """D[k, l] = graph distance between bulk edges k and l (``bond_edges`` order): the smallest
+    vertex-to-vertex distance between their endpoints, 0 when they share a vertex."""
+    import networkx as nx
+
+    edges = bond_edges(g)
+    net = nx.Graph()
+    net.add_nodes_from(range(g.n))
+    net.add_edges_from(edges)
+    dist = dict(nx.all_pairs_shortest_path_length(net))
+    m = len(edges)
+    out = np.zeros((m, m), dtype=int)
+    for k, (a, b) in enumerate(edges):
+        for l, (c, d) in enumerate(edges):
+            out[k, l] = min(dist[a][c], dist[a][d], dist[b][c], dist[b][d])
+    return out

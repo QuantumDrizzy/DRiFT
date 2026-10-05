@@ -301,3 +301,49 @@ def test_tiling_combinatorics(p, q, layers):
 def test_tiling_rejects_euclidean():
     with pytest.raises(ValueError):
         H.pq_tiling(4, 4, 2)
+
+
+# ── phase 23: two events at once ─────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("g", [H.pq_tiling(5, 4, 2), H.square_grid(3, 4), _random_multigraph(7), _random_multigraph(11)])
+def test_pair_response_equals_direct_max_flow(g):
+    edges = H.bond_edges(g)
+    pairs = [(k, l) for k in range(len(edges)) for l in range(k + 1, len(edges))]
+    rng = np.random.default_rng(0)
+    if len(pairs) > 60:
+        pairs = [pairs[i] for i in rng.choice(len(pairs), 60, replace=False)]
+    for i in range(g.n_legs):
+        for j in range(i + 1, g.n_legs):
+            region = tuple(range(i, j))
+            gamma, some, every = H.cut_membership(g, region)
+            for k, l in pairs:
+                got = H.pair_response(g, region, edges[k], edges[l], gamma, some[k], some[l], every[k], every[l])
+                assert got == H.min_cut(H.strengthened(g, [edges[k], edges[l]]), region) - gamma, (region, k, l)
+
+
+def _pair(g, region, k, l):
+    edges = H.bond_edges(g)
+    gamma, some, every = H.cut_membership(g, region)
+    total = H.pair_response(g, region, edges[k], edges[l], gamma, some[k], some[l], every[k], every[l])
+    return total, int(every[k]) + int(every[l])
+
+
+def test_cover_is_super_additive():
+    # v0 -e- v1 -f- v2, two legs on v0 (the region) and two on v2. The minimal cuts are {e} and {f}
+    # (cost 1; the legs cost 2): neither bond is on every one, but every one holds a bond. Doubling
+    # both makes every cut cost 2: the pair responds 1, the singles sum to 0.
+    g = H.BoundaryGraph(3, [(0, 1), (1, 2)], [0, 0, 2, 2], "cover")
+    assert _pair(g, (0, 1), 0, 1) == (1, 0)
+
+
+def test_detour_is_sub_additive():
+    # v0 -e- v1, v0 -f- v2, v2 =2= v1; three legs on v0 (the region), three on v1. The unique
+    # minimal cut is {e, f} (2), so each single responds 1. Doubling both: {e, f} costs 4 but the
+    # region's own legs cost 3 -- a detour that avoids both -- so the pair responds 1, not 2.
+    g = H.BoundaryGraph(3, [(0, 1), (0, 2), (2, 1), (2, 1)], [0, 0, 0, 1, 1, 1], "detour")
+    assert _pair(g, (0, 1, 2), 0, 1) == (1, 2)
+
+
+def test_bond_distance():
+    g = H.BoundaryGraph(4, [(0, 1), (1, 2), (2, 3)], [0, 3], "path")
+    d = H.bond_distance(g)
+    assert d[0, 1] == 0 and d[0, 2] == 1 and d[1, 2] == 0 and d[0, 0] == 0
