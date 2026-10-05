@@ -180,3 +180,75 @@ def test_four_point_delta_of_a_cycle():
     n = 16
     d = np.array([[min(abs(i - j), n - abs(i - j)) for j in range(n)] for i in range(n)], float)
     assert H.gromov_delta(d) == (4.0, 8.0)
+
+
+# ── phase 21: a bulk event seen from the boundary ────────────────────────────────────────────────
+def _perturbed(g, edge, mode):
+    """The graph with one bulk edge removed (mode 'drop') or doubled (mode 'double')."""
+    bonds = [b for b in g.bonds if (min(b), max(b)) != edge]
+    k = len(g.bonds) - len(bonds)                       # its multiplicity
+    bonds += [edge] * (k - 1 if mode == "drop" else k + 1)
+    return H.BoundaryGraph(g.n, bonds, g.legs, g.name)
+
+
+@pytest.mark.parametrize("g", [H.square_grid(4, 5), H.hyperbolic_rings(4), H.random_regular(16, 3, 10, seed=3),
+                               H.BoundaryGraph(4, [(0, 1), (1, 2), (2, 3), (3, 0), (0, 2)], [0, 0, 1, 2, 2, 3])])
+def test_membership_equals_direct_perturbation(g):
+    edges = H.bond_edges(g)
+    for i in range(g.n_legs):
+        for j in range(i + 1, g.n_legs + 1):
+            region = tuple(range(i, j))
+            gamma, some, every = H.cut_membership(g, region)
+            assert gamma == H.min_cut(g, region)
+            for k, e in enumerate(edges):
+                drop = H.min_cut(_perturbed(g, e, "drop"), region)     # one unit of capacity less
+                dbl = H.min_cut(_perturbed(g, e, "double"), region)    # one unit more
+                assert some[k] == (drop == gamma - 1), (region, e)
+                assert every[k] == (dbl == gamma + 1), (region, e)
+
+
+def _random_multigraph(seed):
+    rng = np.random.default_rng(seed)
+    n = int(rng.integers(3, 8))
+    bonds = []
+    for a in range(n):
+        for b in range(a + 1, n):
+            if rng.random() < 0.55:
+                bonds += [(a, b)] * int(rng.integers(1, 4))
+    legs = [int(x) for x in rng.integers(0, n, size=int(rng.integers(4, 8)))]
+    return H.BoundaryGraph(n, bonds, legs, f"multi-{seed}")
+
+
+def test_membership_on_random_multigraphs():
+    # Small multigraphs with parallel bonds and several legs per vertex reach the residual
+    # configurations the regular graphs above never produce.
+    for seed in range(150):
+        g = _random_multigraph(seed)
+        edges = H.bond_edges(g)
+        for i in range(g.n_legs):
+            for j in range(i + 1, g.n_legs):
+                region = tuple(range(i, j))
+                gamma, some, every = H.cut_membership(g, region)
+                for k, e in enumerate(edges):
+                    assert some[k] == (H.min_cut(_perturbed(g, e, "drop"), region) == gamma - 1), (seed, region, e)
+                    assert every[k] == (H.min_cut(_perturbed(g, e, "double"), region) == gamma + 1), (seed, region, e)
+
+
+def test_every_implies_some():
+    g = H.hyperbolic_rings(5)
+    for region in H.intervals(g.n_legs)[::3]:
+        _, some, every = H.cut_membership(g, region)
+        assert not (every & ~some).any()
+
+
+def test_dumbbell_bond_is_on_every_cut():
+    g = H.BoundaryGraph(2, [(0, 1)], [0, 0, 0, 1, 1, 1], "dumbbell")
+    gamma, some, every = H.cut_membership(g, (0, 1, 2))
+    assert gamma == 1 and some[0] and every[0]
+    gamma, some, every = H.cut_membership(g, (0,))                  # one leg is cheaper than the bond
+    assert gamma == 1 and not some[0] and not every[0]
+
+
+def test_ring_of():
+    g = H.hyperbolic_rings(3)
+    assert list(H.ring_of(g)) == [0] * 3 + [1] * 6 + [2] * 12

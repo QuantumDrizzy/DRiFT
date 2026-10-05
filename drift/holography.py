@@ -341,3 +341,83 @@ def nesting_depth(arcs: list[tuple[int, int]]) -> int:
         inner = [depth[q] for q in arcs[:k] if a <= q[0] and q[1] <= b and q != (a, b)]
         depth[(a, b)] = 1 + (max(inner) if inner else 0)
     return max(depth.values(), default=0)
+
+
+# ── phase 21: a bulk event seen from the boundary ────────────────────────────────────────────────
+def bond_edges(g: BoundaryGraph) -> list[tuple[int, int]]:
+    """The distinct bulk edges, as sorted pairs in first-seen order (parallel bonds merge)."""
+    seen: dict[tuple[int, int], None] = {}
+    for a, b in g.bonds:
+        seen.setdefault((min(a, b), max(a, b)), None)
+    return list(seen)
+
+
+def cut_membership(g: BoundaryGraph, region) -> tuple[int, np.ndarray, np.ndarray]:
+    """(γ, some, every) for one region: which bulk edges (``bond_edges`` order) lie on some / on every
+    minimal cut separating the region's legs from the rest.
+
+    One max-flow, then its residual graph (Picard–Queyranne): the minimal cuts are exactly the
+    residual-closed vertex sets that contain the source and not the sink. An edge {u, v} is on every
+    one iff u is residually reachable from the source and v residually reaches the sink (or the
+    reverse); it is on some one iff it is saturated u → v and the closure of {source, u} leaves out
+    both v and the sink. Closures come from the SCC condensation, with reach sets as bitsets.
+
+    These are the general (directed) Picard–Queyranne tests. On an undirected network several are
+    redundant -- a vertex carrying flow reaches the source back along its own flow -- so the
+    saturation, source and sink clauses never change a verdict here (mutating them survives every
+    test, and is shown equivalent in the phase-21 results); they are kept for correctness in general.
+    """
+    import networkx as nx
+    from networkx.algorithms.flow import preflow_push
+
+    edges = bond_edges(g)
+    region = set(region)
+    net = nx.Graph()
+    for a, b in g.bonds:
+        cap = net[a][b]["capacity"] + 1 if net.has_edge(a, b) else 1
+        net.add_edge(a, b, capacity=cap)
+    for i, x in enumerate(g.legs):
+        term = "A" if i in region else "B"
+        cap = net[term][x]["capacity"] + 1 if net.has_edge(term, x) else 1
+        net.add_edge(term, x, capacity=cap)
+    some = np.zeros(len(edges), dtype=bool)
+    every = np.zeros(len(edges), dtype=bool)
+    if "A" not in net or "B" not in net:
+        return 0, some, every
+    res = preflow_push(net, "A", "B")
+    gamma = int(res.graph["flow_value"])
+    live = nx.DiGraph()
+    live.add_nodes_from(res.nodes)
+    live.add_edges_from((u, v) for u, v, a in res.edges(data=True) if a["capacity"] - a["flow"] > 0)
+    cond = nx.condensation(live)
+    comp = cond.graph["mapping"]
+    reach = [0] * cond.number_of_nodes()                    # reach[c]: bitset of components c reaches
+    for c in reversed(list(nx.topological_sort(cond))):
+        r = 1 << c
+        for d in cond.successors(c):
+            r |= reach[d]
+        reach[c] = r
+    s_bits, t_bit = reach[comp["A"]], 1 << comp["B"]
+    co = {c for c in range(len(reach)) if reach[c] & t_bit}  # components that reach the sink
+
+    def in_s(x):
+        return (s_bits >> comp[x]) & 1
+
+    for k, (u, v) in enumerate(edges):
+        cu, cv = comp[u], comp[v]
+        every[k] = (in_s(u) and cv in co) or (in_s(v) and cu in co)
+        for x, y, cx, cy in ((u, v, cu, cv), (v, u, cv, cu)):
+            a = res[x][y]
+            if a["flow"] < a["capacity"]:
+                continue
+            closure = s_bits | reach[cx]
+            if not (closure >> cy) & 1 and not closure & t_bit:
+                some[k] = True
+                break
+    return gamma, some, every
+
+
+def ring_of(g: BoundaryGraph) -> np.ndarray:
+    """Ring index of each vertex of a ``hyperbolic_rings`` graph."""
+    sizes = g.meta["ring_sizes"]
+    return np.repeat(np.arange(len(sizes)), sizes)
