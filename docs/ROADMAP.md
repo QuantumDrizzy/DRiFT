@@ -239,6 +239,18 @@ proving anything — each one makes a piece of the process *observable*.
 - **Next:** a stopping rule for `drift.mps.ground_state` that critical slowing down cannot fool,
   and a re-check of Phase 13's χ curve against this oracle.
 
+### Phase 19 — Random tensor networks: the boundary reads the bulk ✅  *(see [results](results/PHASE19-results.md))*
+- **Understood:** *the averaged Rényi-2 entropy of a random tensor network is an Ising free energy,
+  and at large D it is the minimal cut* -- exactly, with **−log(number of minimal cuts)** as the
+  correction (g = 2, 7, 23 reproduced to 3·10⁻⁴). The minimal cut reads the bulk: logarithmic on a
+  hyperbolic disk (+2 per doubling), linear then turning over on a flat grid (the Manhattan geodesic),
+  a pure volume law on a random graph. At D = 2 the ratio-of-averages map is 51 % off the true
+  averaged entropy; at D = 3, 2.8 %.
+- **Built:** `drift/holography.py` -- boundary graphs, the map onto `IsingModel`, exact Z, min cut by
+  max-flow, direct contraction of Gaussian random tensors. `tests/test_holography.py`, 12/12.
+- **Measured:** rse-hpc-lab exercise 22 (ADR-006); QuBLAR finds the D = ∞ wall on 78/78 large cases.
+- **Next:** phase 2 -- reconstruct the bulk graph from boundary entropies alone (open research).
+
 ### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
   path applies) scale with system size n for fixed instance families, when solving via `drift.solve`
