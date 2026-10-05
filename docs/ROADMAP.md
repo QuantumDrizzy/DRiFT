@@ -288,8 +288,19 @@ proving anything — each one makes a piece of the process *observable*.
   angle), `hyperbolic_distance`, `hyperbolic_angle`. `tests/test_holography.py`, 43/43; 5/5 mutants.
 - **Measured:** rse-hpc-lab exercise 25 (ADR-009): T1, T5, T6, T7 pass; T3/T4's {4,5} and T2's {7,3}
   miss, kept.
-- **Next:** two simultaneous events (is a pair of changes still placed?), finite D, and larger
-  cut-offs.
+- **Next:** two simultaneous events (done, phase 23), finite D, and larger cut-offs.
+
+### Phase 23 — Two bulk events at once ✅  *(see [results](results/PHASE23-results.md))*
+- **Understood:** *two simultaneous bulk changes are both placed by the boundary* (12 890 / 12 890
+  pairs on {5,4} and {4,5}). Their responses mostly add; where they do not, the bonds are close
+  (≥ 97.7 % within two steps). The commonest interaction is a cover: degenerate geodesics through
+  each bond, so the boundary sees the pair where it sees neither event alone. The even tiling never
+  shows a detour.
+- **Built:** `drift/holography.py` -- `strengthened`, `pair_response` (exact pruning: one max-flow
+  only where both bonds lie on some minimal cut), `bond_distance`. `tests/test_holography.py`, 50/50.
+- **Measured:** rse-hpc-lab exercise 26 (ADR-010): V1, V2, V3, V5, V6 pass; V4 (detours outnumber
+  covers) fails on both tilings, kept.
+- **Next:** why {4,5} has no detours; events of unknown number; finite D.
 
 ### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
