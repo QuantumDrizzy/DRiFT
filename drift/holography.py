@@ -421,3 +421,78 @@ def ring_of(g: BoundaryGraph) -> np.ndarray:
     """Ring index of each vertex of a ``hyperbolic_rings`` graph."""
     sizes = g.meta["ring_sizes"]
     return np.repeat(np.arange(len(sizes)), sizes)
+
+
+# ── phase 22: regular hyperbolic tilings ────────────────────────────────────────────────────────
+def _reflect(z: complex, a: complex, b: complex) -> complex:
+    """Reflect z across the hyperbolic geodesic through a and b in the Poincaré disk."""
+    if abs(a) > 1e-12:
+        a_inv = a / abs(a) ** 2
+        u, w = b - a, a_inv - a
+        if abs(u.real * w.imag - u.imag * w.real) > 1e-14:       # a circle orthogonal to the rim
+            m = np.array([[2 * u.real, 2 * u.imag], [2 * w.real, 2 * w.imag]])
+            rhs = np.array([abs(b) ** 2 - abs(a) ** 2, abs(a_inv) ** 2 - abs(a) ** 2])
+            cx, cy = np.linalg.solve(m, rhs)
+            c = complex(cx, cy)
+            return c + abs(a - c) ** 2 / (z - c).conjugate()
+    d = (b - a) / abs(b - a)                                     # a diameter: a Euclidean mirror
+    return a + d * ((z - a) / d).conjugate()
+
+
+def hyperbolic_distance(a: complex, b: complex) -> float:
+    return float(np.arccosh(1 + 2 * abs(a - b) ** 2 / ((1 - abs(a) ** 2) * (1 - abs(b) ** 2))))
+
+
+def hyperbolic_angle(v: complex, a: complex, b: complex) -> float:
+    """The angle at v between the geodesics v→a and v→b (move v to the origin, where they are rays)."""
+    t = lambda z: (z - v) / (1 - v.conjugate() * z)
+    ang = abs(np.angle(t(a)) - np.angle(t(b)))
+    return float(min(ang, 2 * np.pi - ang))
+
+
+def pq_tiling(p: int, q: int, layers: int) -> BoundaryGraph:
+    """A regular {p,q} tiling of the Poincaré disk, one bulk vertex per p-gon.
+
+    The central p-gon is reflected across its edges breadth-first; tiles are deduplicated by their
+    centres; every tile within ``layers`` edge-steps of the centre is kept. Tiles sharing an edge are
+    bonded; each unshared edge of a kept tile is a leg, ordered by the angle of its midpoint.
+    ``meta`` carries the layer of each tile, the tile vertices and each leg's edge.
+    """
+    if (p - 2) * (q - 2) <= 4:
+        raise ValueError(f"{{{p},{q}}} is not hyperbolic")
+    r0 = np.sqrt(np.cos(np.pi / p + np.pi / q) / np.cos(np.pi / p - np.pi / q))
+    key = lambda z: (round(z.real, 9), round(z.imag, 9))
+    tiles = [[complex(r0 * np.exp(2j * np.pi * k / p)) for k in range(p)]]
+    centres, layer, index = [0j], [0], {key(0j): 0}
+    frontier = [0]
+    for depth in range(1, layers + 1):
+        nxt = []
+        for t in frontier:
+            vs = tiles[t]
+            for k in range(p):
+                a, b = vs[k], vs[(k + 1) % p]
+                c = _reflect(centres[t], a, b)
+                if key(c) in index:
+                    continue
+                index[key(c)] = len(tiles)
+                tiles.append([_reflect(v, a, b) for v in vs])
+                centres.append(c)
+                layer.append(depth)
+                nxt.append(len(tiles) - 1)
+        frontier = nxt
+    vkey = lambda z: (round(z.real, 8), round(z.imag, 8))
+    owners: dict[tuple, list[int]] = {}
+    ends: dict[tuple, tuple[complex, complex]] = {}
+    for i, vs in enumerate(tiles):
+        for k in range(p):
+            a, b = vs[k], vs[(k + 1) % p]
+            e = tuple(sorted((vkey(a), vkey(b))))
+            owners.setdefault(e, []).append(i)
+            ends[e] = (a, b)
+    bonds = [(o[0], o[1]) for o in owners.values() if len(o) == 2]
+    open_edges = sorted((float(np.angle((ends[e][0] + ends[e][1]) / 2)), o[0], e)
+                        for e, o in owners.items() if len(o) == 1)
+    legs = [t for _, t, _ in open_edges]
+    meta = {"p": p, "q": q, "layers": layers, "layer": layer, "tiles": tiles,
+            "leg_edges": [ends[e] for _, _, e in open_edges], "max_sharing": max(len(o) for o in owners.values())}
+    return BoundaryGraph(len(tiles), bonds, legs, f"{{{p},{q}}}-{layers}layers", meta)

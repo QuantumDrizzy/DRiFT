@@ -252,3 +252,52 @@ def test_dumbbell_bond_is_on_every_cut():
 def test_ring_of():
     g = H.hyperbolic_rings(3)
     assert list(H.ring_of(g)) == [0] * 3 + [1] * 6 + [2] * 12
+
+
+# ── phase 22: regular hyperbolic tilings ────────────────────────────────────────────────────────
+@pytest.mark.parametrize("p,q,layers", [(5, 4, 3), (4, 5, 3), (7, 3, 2), (3, 7, 3)])
+def test_tiles_are_congruent_with_angle_two_pi_over_q(p, q, layers):
+    g = H.pq_tiling(p, q, layers)
+    lengths, angles = [], []
+    for vs in g.meta["tiles"]:
+        for k in range(p):
+            lengths.append(H.hyperbolic_distance(vs[k], vs[(k + 1) % p]))
+            angles.append(H.hyperbolic_angle(vs[k], vs[k - 1], vs[(k + 1) % p]))
+    assert np.ptp(lengths) < 1e-6
+    assert np.allclose(angles, 2 * np.pi / q, atol=1e-6)
+    # Closed forms (hyperbolic trigonometry of the right triangle centre / vertex / edge midpoint):
+    # cosh(edge/2) = cos(π/p) / sin(π/q), and the circumradius R has cosh R = cot(π/p) cot(π/q).
+    assert lengths[0] == pytest.approx(2 * np.arccosh(np.cos(np.pi / p) / np.sin(np.pi / q)), abs=1e-6)
+    radius = np.arccosh(1 / (np.tan(np.pi / p) * np.tan(np.pi / q)))
+    assert abs(g.meta["tiles"][0][0]) == pytest.approx(np.tanh(radius / 2), abs=1e-9)
+
+
+@pytest.mark.parametrize("p,q,layers", [(5, 4, 3), (4, 5, 4), (7, 3, 3)])
+def test_tiling_combinatorics(p, q, layers):
+    g = H.pq_tiling(p, q, layers)
+    assert g.meta["max_sharing"] <= 2
+    deg = np.zeros(g.n, dtype=int)
+    for a, b in g.bonds:
+        deg[a] += 1
+        deg[b] += 1
+    lay = np.array(g.meta["layer"])
+    assert (deg[lay < layers] == p).all()                        # inner tiles have all p neighbours
+    count: dict = {}
+    for i, vs in enumerate(g.meta["tiles"]):
+        for v in vs:
+            count.setdefault((round(v.real, 8), round(v.imag, 8)), set()).add(i)
+    inner = {(round(v.real, 8), round(v.imag, 8)) for i, vs in enumerate(g.meta["tiles"]) if lay[i] <= layers - 2 for v in vs}
+    assert all(len(count[v]) == q for v in inner)
+    # each tile's legs = p minus its bonds, and consecutive legs are contiguous edges
+    legs_per = np.bincount(g.legs, minlength=g.n)
+    assert (legs_per + deg == p).all()
+    e = g.meta["leg_edges"]
+    key = lambda z: (round(z.real, 8), round(z.imag, 8))
+    for k in range(len(e)):
+        a, b = e[k], e[(k + 1) % len(e)]
+        assert {key(a[0]), key(a[1])} & {key(b[0]), key(b[1])}, k
+
+
+def test_tiling_rejects_euclidean():
+    with pytest.raises(ValueError):
+        H.pq_tiling(4, 4, 2)
