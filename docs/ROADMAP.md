@@ -300,7 +300,18 @@ proving anything — each one makes a piece of the process *observable*.
   only where both bonds lie on some minimal cut), `bond_distance`. `tests/test_holography.py`, 50/50.
 - **Measured:** rse-hpc-lab exercise 26 (ADR-010): V1, V2, V3, V5, V6 pass; V4 (detours outnumber
   covers) fails on both tilings, kept.
-- **Next:** why {4,5} has no detours; events of unknown number; finite D.
+- **Next:** why {4,5} has no detours; events of unknown number (done, phase 24); finite D.
+
+### Phase 24 — Decoding an unknown number of events ✅  *(see [results](results/PHASE24-results.md))*
+- **Understood:** *the boundary decodes how many bulk bonds changed and which*, through an additive
+  model with a sparsity term solved as a QUBO. Every set of up to 6 events among 140 bonds on {4,5} is
+  recovered, and 192/200 on {5,4}. Every failure is an alias born of interacting events; the model
+  fails, the solver does not.
+- **Built:** `drift/holography.py` -- `decode_qubo`, `qubo_objective`, `qubo_to_ising`, `decode_events`
+  (DRiFT's annealing on the Ising map). `tests/test_holography.py`, 59/59; 5/5 mutants.
+- **Measured:** rse-hpc-lab exercise 27 (ADR-011): W1, W2, W3, W6 pass; W4 (monotone) and W7 (QuBLAR
+  <= annealing) fail on {5,4}; W5 vacuous on {4,5}.
+- **Next:** a decoder that knows about covers (pairwise terms from phase 23); finite D; noise.
 
 ### Scale path — versioned instance bank + measurable sweeps ✅  *(see [results](results/SCALE-sweep.md), [tech report](TECH-REPORT.md))*
 - **Question (falsifiable):** *How do wall-clock time and solution quality (and χ where an MPS/tensor
