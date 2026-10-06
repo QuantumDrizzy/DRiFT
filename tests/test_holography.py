@@ -347,3 +347,49 @@ def test_bond_distance():
     g = H.BoundaryGraph(4, [(0, 1), (1, 2), (2, 3)], [0, 3], "path")
     d = H.bond_distance(g)
     assert d[0, 1] == 0 and d[0, 2] == 1 and d[1, 2] == 0 and d[0, 0] == 0
+
+
+# ── phase 24: decoding an unknown number of events ──────────────────────────────────────────────
+def _toy_decoding(seed, m=10, cells=40):
+    rng = np.random.default_rng(seed)
+    sig = (rng.random((m, cells)) < 0.25).astype(int)
+    truth = np.zeros(m, dtype=int)
+    truth[rng.choice(m, 3, replace=False)] = 1
+    y = sig.T @ truth + (rng.random(cells) < 0.05)                     # a little non-additivity
+    return sig, y, truth
+
+
+@pytest.mark.parametrize("seed", range(4))
+def test_qubo_is_the_objective_and_the_ising_energy(seed):
+    sig, y, _ = _toy_decoding(seed)
+    a, b, c = H.decode_qubo(sig, y, lam=1)
+    model = H.qubo_to_ising(a, b)
+    xs = np.array(list(itertools.product([0, 1], repeat=len(a))))
+    direct = np.array([((y - sig.T @ x) ** 2).sum() + x.sum() for x in xs])
+    qubo = np.array([H.qubo_objective(a, b, c, x) for x in xs])
+    assert (qubo == direct).all()
+    energy = model.energy_batch(2 * xs - 1)
+    assert np.ptp(energy - direct) < 1e-9                              # equal up to one constant
+
+
+@pytest.mark.parametrize("seed", range(4))
+def test_decoder_finds_the_brute_force_minimum(seed):
+    sig, y, _ = _toy_decoding(seed)
+    a, b, c = H.decode_qubo(sig, y, lam=1)
+    xs = np.array(list(itertools.product([0, 1], repeat=len(a))))
+    best = min(H.qubo_objective(a, b, c, x) for x in xs)
+    x, o = H.decode_events(sig, y, lam=1)
+    assert o == best == H.qubo_objective(a, b, c, x)
+
+
+def test_single_event_is_decoded_exactly_on_a_tiling():
+    g = H.pq_tiling(5, 4, 2)
+    edges = H.bond_edges(g)
+    ivs = [(i, j) for i in range(g.n_legs) for j in range(i + 1, g.n_legs)]
+    every = np.array([H.cut_membership(g, tuple(range(i, j)))[2] for i, j in ivs]).T
+    gam = np.array([H.min_cut(g, tuple(range(i, j))) for i, j in ivs])
+    for k in (0, 7, 19):
+        y = np.array([H.min_cut(H.strengthened(g, [edges[k]]), tuple(range(i, j))) for i, j in ivs]) - gam
+        assert (y == every[k]).all()                                   # a single event is exactly additive
+        x, _ = H.decode_events(every.astype(int), y)
+        assert list(np.nonzero(x)[0]) == [k]

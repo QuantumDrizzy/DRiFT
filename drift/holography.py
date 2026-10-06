@@ -533,3 +533,47 @@ def bond_distance(g: BoundaryGraph) -> np.ndarray:
         for l, (c, d) in enumerate(edges):
             out[k, l] = min(dist[a][c], dist[a][d], dist[b][c], dist[b][d])
     return out
+
+
+# ── phase 24: decoding an unknown number of events ──────────────────────────────────────────────
+def decode_qubo(signatures: np.ndarray, y: np.ndarray, lam: int = 1) -> tuple[np.ndarray, np.ndarray, int]:
+    """QUBO for O(x) = ‖y − Sᵀx‖² + λ|x| over x ∈ {0,1}^m, S of shape (m, cells).
+
+    Returns (a, B, c): O(x) = c + Σ_e a_e x_e + Σ_{e<f} B_ef x_e x_f, all integer.
+    """
+    s = np.asarray(signatures, dtype=np.int64)
+    y = np.asarray(y, dtype=np.int64)
+    gram = s @ s.T
+    a = np.diag(gram) - 2 * (s @ y) + lam
+    b = np.triu(2 * gram, 1)
+    return a, b, int(y @ y)
+
+
+def qubo_objective(a: np.ndarray, b: np.ndarray, c: int, x: np.ndarray) -> int:
+    x = np.asarray(x, dtype=np.int64)
+    return int(c + a @ x + x @ b @ x)
+
+
+def qubo_to_ising(a: np.ndarray, b: np.ndarray) -> IsingModel:
+    """The Ising model whose energy is the QUBO objective up to a constant, with x = (1 + s)/2."""
+    full = (b + b.T).astype(float)                         # Σ_{e<f} B x x = ½ Σ_{e≠f} full x x
+    j = -0.25 * full                                       # −½ sᵀJs = ⅛ sᵀ full s
+    h = -(0.5 * a + 0.25 * full.sum(axis=1))
+    return IsingModel(j, h)
+
+
+def decode_events(signatures: np.ndarray, y: np.ndarray, lam: int = 1, seeds: int = 8,
+                  n_sweeps: int = 400) -> tuple[np.ndarray, int]:
+    """The set of events (a 0/1 vector) that best explains y, by simulated annealing on the QUBO."""
+    from drift.solvers.annealing import simulated_annealing
+
+    a, b, c = decode_qubo(signatures, y, lam)
+    model = qubo_to_ising(a, b)
+    best_x, best_o = None, None
+    for seed in range(seeds):
+        s, *_ = simulated_annealing(model, n_sweeps=n_sweeps, T0=float(max(1.0, np.abs(a).max())), T1=0.05, seed=seed)
+        x = ((s + 1) // 2).astype(np.int64)
+        o = qubo_objective(a, b, c, x)
+        if best_o is None or o < best_o:
+            best_x, best_o = x, o
+    return best_x, best_o
